@@ -40,6 +40,8 @@ private:
 
 	UPROPERTY()
 		float CurrentPollutionScale = 0.0f;
+	UPROPERTY()
+		UMaterialInterface* HitMaterial;
 
 	UFUNCTION()
 		FLinearColor GetBaseColour();
@@ -50,6 +52,7 @@ private:
 	UFUNCTION()
 		void AddPollution();
 
+
 public:
 	const FVector getLocation() { return Location; }
 	FRotator getRotation() { return Rotation; }
@@ -57,10 +60,12 @@ public:
 	FHitResult* getHitresult() { return &Hitresult; }
 	FLinearColor const getBaseColor() { return CurrentMaterial; }
 	float const getFootPollution() { return FootPollution; }
+	float getDepth();
 
 	void setLocation(FVector loc) { Location = loc; }
 	void setRotation(FFootPrintValues values);
 	void setBoneName(FName name) { Name = name; }
+	void setHitMaterial(UMaterialInterface* hitMaterial) { HitMaterial = hitMaterial; }
 	bool const HasPollution() { return (FootPollution > 0.0f); }
 	void IncreaseFootPollution();
 

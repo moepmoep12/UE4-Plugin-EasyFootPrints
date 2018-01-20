@@ -6,6 +6,7 @@
 #include "Components/PrimitiveComponent.h"
 #include "Materials/MaterialInterface.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "LandscapeComponent.h"
 
 
 
@@ -18,7 +19,7 @@ void UFoot::setRotation(FFootPrintValues values)
 
 void UFoot::IncreaseFootPollution()
 {
-	if (!Hitresult.GetComponent()) {
+	if (!HitMaterial) {
 		return;
 	}
 
@@ -46,28 +47,23 @@ void UFoot::DecreaseFootPollution()
 
 FLinearColor UFoot::GetBaseColour()
 {
-	TArray<UMaterialInterface*> MaterialsOfHitComponent;
 	FLinearColor BaseColor;
-	Hitresult.GetComponent()->GetUsedMaterials(MaterialsOfHitComponent);
 
-	for (UMaterialInterface* MaterialOfComponent : MaterialsOfHitComponent)
-	{
-		if (MaterialOfComponent->GetVectorParameterValue(FName("BaseTexture"), BaseColor))
-			return BaseColor;
+	if (HitMaterial->GetVectorParameterValue(FName("BaseTexture"), BaseColor)) {
+		return BaseColor;
 	}
+
 	return FLinearColor(0, 0, 0);
 }
 
 float UFoot::GetPollutionScale()
 {
-	TArray<UMaterialInterface*> MaterialsOfHitComponent;
 	float PollutionScale = 0;
-	Hitresult.GetComponent()->GetUsedMaterials(MaterialsOfHitComponent);
-	for (UMaterialInterface* MaterialOfComponent : MaterialsOfHitComponent)
-	{
-		if (MaterialOfComponent->GetScalarParameterValue(FName("PollutionScale"), PollutionScale))
-			return PollutionScale;
+
+	if (HitMaterial->GetScalarParameterValue(FName("PollutionScale"), PollutionScale)) {
+		return PollutionScale;
 	}
+	GEngine->AddOnScreenDebugMessage(1, 1, FColor::Green, FString("PollutionScale = ") + FString::SanitizeFloat(PollutionScale));
 	return 0.0f;
 }
 
@@ -77,36 +73,9 @@ void UFoot::AddPollution()
 	FootPollution = FMath::Clamp<float>((1 - FMath::Exp(-PollutionScale / 5) + FootPollution), 0.0f, 1.0f);
 }
 
-
-/*
-bool UFoot::ChangeMaterial(UPhysicalMaterial* physmat)
+float UFoot::getDepth()
 {
-
-	if (!CurrentMaterial) {
-		CurrentMaterial = NewObject<UMaterialInfo>();
-		CurrentMaterial->setPhysMaterial(physmat);
-	}
-
-	if (CurrentMaterial->getPhysMaterial() == physmat)
-	{
-		if (LastMaterialTouched && LastMaterialTouched->getAmountSteps() > 0)
-		{
-			LastMaterialTouched->decrementAmountSteps();
-			return true;
-		}
-			CurrentMaterial->incrementAmountSteps();
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, FString("Current == Last"));
-			return false;
-	}
-
-	else
-	{
-		LastMaterialTouched = CurrentMaterial;
-		CurrentMaterial = NewObject<UMaterialInfo>();
-		CurrentMaterial->setPhysMaterial(physmat);
-		LastMaterialTouched->decrementAmountSteps();
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString("Current != Last"));
-		return true;
-	}
+	float depth = 0;
+	HitMaterial->GetScalarParameterValue(FName("Depth"), depth);
+	return depth; 
 }
-*/

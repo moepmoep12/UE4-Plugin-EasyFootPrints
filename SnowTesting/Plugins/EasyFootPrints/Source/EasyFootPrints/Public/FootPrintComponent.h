@@ -12,7 +12,7 @@
 class UTextureRenderTarget2D;
 class USoundManager;
 class UCharacterMovementComponent;
-
+class URenderTargetComputations;
 
 UCLASS(ClassGroup = (EasyFootPrints), meta = (BlueprintSpawnableComponent))
 class EASYFOOTPRINTS_API UFootPrintComponent : public UActorComponent
@@ -36,10 +36,6 @@ private:
 	UPROPERTY()
 		UFoot* FootOnGround;
 	UPROPERTY()
-		UTextureRenderTarget2D* RenderTargetOfHitMaterial = nullptr;
-	UPROPERTY()
-		UTexture* RenderTexture;
-	UPROPERTY()
 		USoundManager* SoundManager;
 	UPROPERTY()
 		float OriginaMaxWalkingSpeed;
@@ -47,6 +43,8 @@ private:
 		float CurrentMaxWalkSpeed;
 	UPROPERTY()
 		UCharacterMovementComponent* MovementComponent;
+	UPROPERTY()
+		URenderTargetComputations* RenderTargetComputations;
 
 protected:
 	// Called when the game starts
@@ -55,12 +53,6 @@ protected:
 	void initFeet();
 	void Trace();
 	void setFootOnGround();
-	void SpawnDecal();
-	bool hasComponentRenderTarget();
-	FVector2D InitComputationOfRenderTargetScreenPosition();
-	FVector2D ComputeRenderTargetScreenSize();
-	FVector2D ComputeScreenPositionOnRenderTarget(FVector ActorLocation, FVector HitLocation, FVector ActorBounds);
-	FVector2D Get2DVectorWithXAndYFrom3DVector(FVector VectorToBeComputed);
 	void CreatePollutionFootPrint();
 	void resetWalkSpeed();
 	void adjustMaxWalkSpeed(float depth);
@@ -69,11 +61,15 @@ protected:
 public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	// Constructor
 	UFootPrintComponent();
+
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Create 2D Footprint", Keywords = "print plugin"), Category = "EasyFootPrints")
 		void OnFootDown();
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, meta = (DisplayName = "create FootPrint on RenderTarget", Keywords = "print plugin render create "), Category = "EasyFootPrints")
-		void createFootPrintOnRenderTarget();
+	UFUNCTION()
+		UFoot* getFootOnGround() { return FootOnGround; };
+	UFUNCTION()
+		ACharacter* getPlayer() { return Player; };
 
 
 };

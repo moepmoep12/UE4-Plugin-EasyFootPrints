@@ -8,24 +8,14 @@
 #include "FootPrintDecal.h"
 #include "Engine/GameEngine.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "PhysicalMaterials/PhysicalMaterial.h"
-#include "Kismet/KismetRenderingLibrary.h"
-#include "Engine/Canvas.h"
-#include "Engine/TextureRenderTarget2D.h"
-#include "Materials/MaterialInstanceDynamic.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Engine/World.h"
-#include "Runtime/Engine/Classes/Components/AudioComponent.h"
-#include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h"
-#include "Runtime/CoreUObject/Public/UObject/UObjectGlobals.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "SoundManager.h"
-#include "LandscapeComponent.h"
-#include "Runtime/Landscape/Classes/LandscapeProxy.h"
-#include "Runtime/Landscape/Classes/Landscape.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-
+#include "RenderTargetComputations.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 
 // Sets default values for this component's properties
@@ -48,6 +38,8 @@ void UFootPrintComponent::BeginPlay()
 		Player = GetWorld()->GetFirstPlayerController()->GetCharacter();
 		MovementComponent = Cast<UCharacterMovementComponent>(Player->GetMovementComponent());
 		OriginaMaxWalkingSpeed = MovementComponent->MaxWalkSpeed;
+		RenderTargetComputations = NewObject<URenderTargetComputations>();
+		RenderTargetComputations->initRenderTargetComputations(this);
 	}
 
 	//SoundManager->InitFootprintSound(Player);
@@ -74,20 +66,21 @@ void UFootPrintComponent::OnFootDown()
 	LoadFootPositions();
 	Trace();
 	setFootOnGround();
-
-	if (hasComponentRenderTarget())
-	{
-		createFootPrintOnRenderTarget();
+	
+	if (RenderTargetComputations->computeRenderTarget()) {
+		float depth = FootOnGround->getDepth();
+		adjustMaxWalkSpeed(depth);
 	}
 
-	else
-	{
-		if (FootOnGround->HasPollution()) 
+	else {
+
+		resetWalkSpeed();
+
+		if (FootOnGround->HasPollution())
 		{
 			CreatePollutionFootPrint();
 		}
 	}
-	
 
 	//SoundManager->PlayFootprintSound();
 
@@ -171,135 +164,6 @@ void UFootPrintComponent::setFootOnGround()
 	FootOnGround = FootValues.TrackedFeet[key];
 }
 
-
-/*
-*	TO-DO : Implement Pollution System
-*/
-void UFootPrintComponent::SpawnDecal()
-{
-	TWeakObjectPtr<UPhysicalMaterial> physmat = FootOnGround->getHitresult()->PhysMaterial;
-
-
-	/*  TODO : PollutionSystem
-
-	if (physmat != nullptr)
-	{
-	if (foot->ChangeMaterial(physmat.Get()) && foot->getLastMaterialTouched()->getAmountSteps() > 0)
-	{
-	
-
-	}
-
-	}
-	*/
-}
-
-
-/*
-*	Checks whether the hit component has a MaterialInstance with a RenderTarget
-*	if true set RenderTargetOfHitMaterial
-*/
-bool UFootPrintComponent::hasComponentRenderTarget()
-{
-	UActorComponent* ActorComponent = nullptr;
-	ULandscapeComponent* LandscapeComponent = nullptr;
-
-	if (FootOnGround->getHitresult()->GetActor()) {
-		ActorComponent = FootOnGround->getHitresult()->GetActor()->FindComponentByClass(ULandscapeComponent::StaticClass());
-		LandscapeComponent = Cast<ULandscapeComponent>(ActorComponent);
-	}
-	
-	if (!FootOnGround || !LandscapeComponent) {
-		resetWalkSpeed();
-		return false;
-	}
-
-	TArray<UMaterialInterface*> MaterialsOfHitComponent = TArray<UMaterialInterface*>();
-	LandscapeComponent->GetUsedMaterials(MaterialsOfHitComponent);
-	
-	for (UMaterialInterface* mat : MaterialsOfHitComponent) {
-		if (mat->GetTextureParameterValue(FName("RenderTarget"), RenderTexture)) {
-			float Depth = 1;
-			if (mat->GetScalarParameterValue(FName("Depth"), Depth)) {
-				adjustMaxWalkSpeed(Depth);
-			}
-			if (RenderTexture) {
-				RenderTargetOfHitMaterial = static_cast<UTextureRenderTarget2D*>(RenderTexture);
-				return true;
-			}
-		}
-	}
-	resetWalkSpeed();
-	return false;
-}
-void UFootPrintComponent::createFootPrintOnRenderTarget_Implementation()
-{
-
-	UCanvas* Canvas = nullptr;
-	FVector2D ScreenSize = FVector2D(0, 0);
-	FDrawToRenderTargetContext Context;
-	FVector2D CoordinatePosition = FVector2D(0, 0);
-
-	UKismetRenderingLibrary::BeginDrawCanvasToRenderTarget(Player, RenderTargetOfHitMaterial, Canvas, ScreenSize, Context);
-
-	FVector2D ScreenPosition = InitComputationOfRenderTargetScreenPosition();
-	ScreenSize = ComputeRenderTargetScreenSize();
-	Canvas->K2_DrawMaterial(M_Spot, ScreenPosition, ScreenSize, CoordinatePosition);
-
-	UKismetRenderingLibrary::EndDrawCanvasToRenderTarget(Player, Context);
-	RenderTargetOfHitMaterial = nullptr;
-
-	FootOnGround->IncreaseFootPollution();
-
-}
-
-FVector2D UFootPrintComponent::ComputeRenderTargetScreenSize() {
-	int32 XSize = RenderTargetOfHitMaterial->SizeX;
-	int32 YSize = RenderTargetOfHitMaterial->SizeY;
-	FVector2D ScreenSize = FVector2D(XSize * 0.01, YSize * 0.01);
-	return ScreenSize;
-}
-
-FVector2D UFootPrintComponent::InitComputationOfRenderTargetScreenPosition() {
-
-	FVector ActorLocation = FootOnGround->getHitresult()->GetActor()->GetActorLocation();
-	FVector HitLocation = FootOnGround->getHitresult()->Location;
-	FVector ActorBounds;
-	FVector ActorBoundsOrigin;
-	FootOnGround->getHitresult()->GetActor()->GetActorBounds(true, ActorBoundsOrigin, ActorBounds);
-
-	FVector2D ScreenPosition = ComputeScreenPositionOnRenderTarget(ActorLocation, HitLocation, ActorBounds);
-	return ScreenPosition;
-
-}
-
-
-FVector2D UFootPrintComponent::ComputeScreenPositionOnRenderTarget(FVector ActorLocation, FVector HitLocation, FVector ActorBounds) {
-
-	int32 XSizeOfRT = RenderTargetOfHitMaterial->SizeX;
-	int32 YSizeOfRT = RenderTargetOfHitMaterial->SizeY;
-	FVector2D RenderTargetSize = FVector2D(XSizeOfRT, YSizeOfRT);
-
-	FVector2D ActorLocation2D = Get2DVectorWithXAndYFrom3DVector(ActorLocation);
-	FVector2D HitLocation2D = Get2DVectorWithXAndYFrom3DVector(HitLocation);
-	FVector2D ActorBounds2D = Get2DVectorWithXAndYFrom3DVector(ActorBounds);
-
-	ActorBounds2D *= 2;
-	FVector2D ScreenPosition = ActorLocation2D - HitLocation2D;
-	ScreenPosition.X = UKismetMathLibrary::Abs(ScreenPosition.X / ActorBounds2D.X);
-	ScreenPosition.Y = UKismetMathLibrary::Abs(ScreenPosition.Y / ActorBounds2D.Y);
-
-	FVector2D ScreenPositionPart1 = FVector2D(XSizeOfRT * (ScreenPosition.X - 0.5), YSizeOfRT * (ScreenPosition.Y - 0.5));
-	FVector2D ScreenPositionPart2 = FVector2D(XSizeOfRT * 0.5 * 0.99, YSizeOfRT * 0.5 * 0.99);
-	ScreenPosition = ScreenPositionPart1 + ScreenPositionPart2;
-	//ScreenPosition = RenderTargetSize - ScreenPosition;
-	return ScreenPosition;
-}
-
-FVector2D UFootPrintComponent::Get2DVectorWithXAndYFrom3DVector(FVector VectorToBeComputed) {
-	return FVector2D(VectorToBeComputed.X, VectorToBeComputed.Y);
-}
-
 void UFootPrintComponent::CreatePollutionFootPrint()
 {
 	if (!GetWorld())
@@ -325,10 +189,12 @@ void UFootPrintComponent::resetWalkSpeed()
 	if (!MovementComponent) {
 		return;
 	}
-	GEngine->AddOnScreenDebugMessage(3, 3, FColor::Red, FString("Reseting WalkSpeed"));
-	MovementComponent->MaxWalkSpeed = OriginaMaxWalkingSpeed;
+	if (MovementComponent->MaxWalkSpeed != OriginaMaxWalkingSpeed) {
+		GEngine->AddOnScreenDebugMessage(3, 0.1, FColor::Red, FString("Reseting WalkSpeed"));
+		MovementComponent->MaxWalkSpeed = OriginaMaxWalkingSpeed;
+	}
+
 	CurrentMaxWalkSpeed = OriginaMaxWalkingSpeed;
-	
 }
 
 void UFootPrintComponent::adjustMaxWalkSpeed(float depth)

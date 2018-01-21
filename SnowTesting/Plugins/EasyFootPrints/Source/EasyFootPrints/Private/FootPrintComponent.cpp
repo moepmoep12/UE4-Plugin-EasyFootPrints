@@ -24,7 +24,7 @@ UFootPrintComponent::UFootPrintComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 	FootValues = FFootPrintValues();
 	//SoundManager = NewObject<USoundManager>();
-	
+
 }
 
 
@@ -33,14 +33,15 @@ void UFootPrintComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	UE_LOG(LogTemp, Warning, TEXT("Begin Play"))
-	
-	if (!Player) {
-		Player = GetWorld()->GetFirstPlayerController()->GetCharacter();
-		MovementComponent = Cast<UCharacterMovementComponent>(Player->GetMovementComponent());
-		OriginaMaxWalkingSpeed = MovementComponent->MaxWalkSpeed;
-		RenderTargetComputations = NewObject<URenderTargetComputations>();
-		RenderTargetComputations->initRenderTargetComputations(this);
-	}
+
+		if (!Player) {
+			Player = GetWorld()->GetFirstPlayerController()->GetCharacter();
+			MovementComponent = Cast<UCharacterMovementComponent>(Player->GetMovementComponent());
+			OriginaMaxWalkingSpeed = MovementComponent->MaxWalkSpeed;
+			OriginalJumpVelocity = MovementComponent->JumpZVelocity;
+			RenderTargetComputations = NewObject<URenderTargetComputations>();
+			RenderTargetComputations->initRenderTargetComputations(this);
+		}
 
 	//SoundManager->InitFootprintSound(Player);
 }
@@ -60,21 +61,22 @@ void UFootPrintComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 void UFootPrintComponent::OnFootDown()
 {
 	if (!Player) {
-			Player = GetWorld()->GetFirstPlayerController()->GetCharacter();
+		Player = GetWorld()->GetFirstPlayerController()->GetCharacter();
 	}
 
 	LoadFootPositions();
 	Trace();
 	setFootOnGround();
-	
-	if (RenderTargetComputations->computeRenderTarget()) {
-		float depth = FootOnGround->getDepth();
-		adjustMaxWalkSpeed(depth);
+
+	if (RenderTargetComputations->computeRenderTarget())
+	{
+		AdjustCharacterMovement();
 	}
 
-	else {
-
+	else
+	{
 		resetWalkSpeed();
+		resetJumpVelocity();
 
 		if (FootOnGround->HasPollution())
 		{
@@ -84,6 +86,13 @@ void UFootPrintComponent::OnFootDown()
 
 	//SoundManager->PlayFootprintSound();
 
+}
+
+void UFootPrintComponent::AdjustCharacterMovement()
+{
+	float depth = FootOnGround->getDepth();
+	adjustMaxWalkSpeed(depth);
+	adjustJumpVelocity(depth);
 }
 
 
@@ -134,7 +143,8 @@ void UFootPrintComponent::Trace()
 
 	for (UFoot* f : FootValues.TrackedFeet)
 	{
-		FVector end = FVector(f->getLocation().X, f->getLocation().Y, f->getLocation().Z - 20.0f);
+
+		FVector end = FVector(f->getLocation().X, f->getLocation().Y, f->getLocation().Z - 50.0f);
 		//perform LineTrace
 		GetWorld()->LineTraceSingleByChannel(*f->getHitresult(), f->getLocation(), end, ECollisionChannel::ECC_Visibility, TraceParams);
 		//set Rotation
@@ -145,7 +155,7 @@ void UFootPrintComponent::Trace()
 
 
 /*
-*	Calculates the foot that is touching the ground
+*	Calculates the foot that is touching/closest to the ground
 *	To-Do: Implement Lambda for Sorting
 */
 void UFootPrintComponent::setFootOnGround()
@@ -170,18 +180,18 @@ void UFootPrintComponent::CreatePollutionFootPrint()
 	{
 		return;
 	}
-		ADecalActor* Adecal = GetWorld()->SpawnActor<ADecalActor>(AFootPrintDecal::StaticClass(), FootOnGround->getHitresult()->Location, FootOnGround->getRotation());
-		Adecal->SetDecalMaterial(FootPrintMaterial);
-		UMaterialInstanceDynamic* matinstance = Adecal->CreateDynamicMaterialInstance();
-		Adecal->SetDecalMaterial(matinstance);
-		FLinearColor ColorA = FLinearColor(0, 0, 0, 0);
-		FLinearColor LerpedColor = UKismetMathLibrary::LinearColorLerp(ColorA, FootOnGround->getBaseColor(), FootOnGround->getFootPollution());
+	ADecalActor* Adecal = GetWorld()->SpawnActor<ADecalActor>(AFootPrintDecal::StaticClass(), FootOnGround->getHitresult()->Location, FootOnGround->getRotation());
+	Adecal->SetDecalMaterial(FootPrintMaterial);
+	UMaterialInstanceDynamic* matinstance = Adecal->CreateDynamicMaterialInstance();
+	Adecal->SetDecalMaterial(matinstance);
+	FLinearColor ColorA = FLinearColor(0, 0, 0, 0);
+	FLinearColor LerpedColor = UKismetMathLibrary::LinearColorLerp(ColorA, FootOnGround->getBaseColor(), FootOnGround->getFootPollution());
 
-		matinstance->SetVectorParameterValue(FName("FootPrintColor"), LerpedColor);
+	matinstance->SetVectorParameterValue(FName("FootPrintColor"), LerpedColor);
 
-		// called after FootPrints have been created
-		FootOnGround->DecreaseFootPollution();
-	
+	// called after FootPrints have been created
+	FootOnGround->DecreaseFootPollution();
+
 }
 
 void UFootPrintComponent::resetWalkSpeed()
@@ -190,26 +200,49 @@ void UFootPrintComponent::resetWalkSpeed()
 		return;
 	}
 	if (MovementComponent->MaxWalkSpeed != OriginaMaxWalkingSpeed) {
-		GEngine->AddOnScreenDebugMessage(3, 0.1, FColor::Red, FString("Reseting WalkSpeed"));
+		//GEngine->AddOnScreenDebugMessage(3, 0.1, FColor::Red, FString("Reseting WalkSpeed"));
 		MovementComponent->MaxWalkSpeed = OriginaMaxWalkingSpeed;
 	}
 
 	CurrentMaxWalkSpeed = OriginaMaxWalkingSpeed;
 }
 
+void UFootPrintComponent::resetJumpVelocity()
+{
+	if (!MovementComponent) {
+		return;
+	}
+
+	if (MovementComponent->JumpZVelocity != CurrentJumpVelocity) {
+		MovementComponent->JumpZVelocity = OriginalJumpVelocity;
+	}
+
+	CurrentJumpVelocity = OriginalJumpVelocity;
+}
+
 void UFootPrintComponent::adjustMaxWalkSpeed(float depth)
 {
 	if (!MovementComponent) {
-		GEngine->AddOnScreenDebugMessage(2, 3, FColor::Red, FString("MovementComponent = nullptr"));
 		return;
 	}
 
 	float adjustedWalkSpeed = OriginaMaxWalkingSpeed * (1 / depth);
-	GEngine->AddOnScreenDebugMessage(0, 3, FColor::Blue,FString("Depth:") +  FString::SanitizeFloat(depth));
-	GEngine->AddOnScreenDebugMessage(1, 3, FColor::Blue,FString("adjustedSpeed:" +  FString::SanitizeFloat(adjustedWalkSpeed)));
 
 	if (adjustedWalkSpeed != CurrentMaxWalkSpeed) {
 		Cast<UCharacterMovementComponent>(Player->GetMovementComponent())->MaxWalkSpeed = adjustedWalkSpeed;
 		CurrentMaxWalkSpeed = adjustedWalkSpeed;
+	}
+}
+
+void UFootPrintComponent::adjustJumpVelocity(float depth)
+{
+	if (!MovementComponent) {
+		return;
+	}
+
+	float adjustedJumpVelocity = OriginalJumpVelocity * (1 / depth);
+	if (adjustedJumpVelocity != CurrentJumpVelocity) {
+		Cast<UCharacterMovementComponent>(Player->GetMovementComponent())->JumpZVelocity = adjustedJumpVelocity;
+		CurrentJumpVelocity = adjustedJumpVelocity;
 	}
 }

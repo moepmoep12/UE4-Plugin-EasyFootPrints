@@ -40,6 +40,7 @@ private:
 
 	UPROPERTY()
 		float CurrentPollutionScale = 0.0f;
+
 	UPROPERTY()
 		UMaterialInterface* HitMaterial;
 

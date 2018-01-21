@@ -42,6 +42,10 @@ private:
 	UPROPERTY()
 		float CurrentMaxWalkSpeed;
 	UPROPERTY()
+		float OriginalJumpVelocity;
+	UPROPERTY()
+		float CurrentJumpVelocity;
+	UPROPERTY()
 		UCharacterMovementComponent* MovementComponent;
 	UPROPERTY()
 		URenderTargetComputations* RenderTargetComputations;
@@ -55,7 +59,9 @@ protected:
 	void setFootOnGround();
 	void CreatePollutionFootPrint();
 	void resetWalkSpeed();
+	void resetJumpVelocity();
 	void adjustMaxWalkSpeed(float depth);
+	void adjustJumpVelocity(float depth);
 	
 
 public:
@@ -66,6 +72,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Create 2D Footprint", Keywords = "print plugin"), Category = "EasyFootPrints")
 		void OnFootDown();
+	void AdjustCharacterMovement();
 	UFUNCTION()
 		UFoot* getFootOnGround() { return FootOnGround; };
 	UFUNCTION()

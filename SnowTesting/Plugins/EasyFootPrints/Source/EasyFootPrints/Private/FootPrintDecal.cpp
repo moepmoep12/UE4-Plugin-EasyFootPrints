@@ -6,6 +6,6 @@
 
 AFootPrintDecal::AFootPrintDecal() 
 {
-	GetDecal()->DecalSize = FVector(10, 20, 20);
+	GetDecal()->DecalSize = FVector(20, 30, 20);
 }
 

@@ -38,6 +38,7 @@ bool URenderTargetComputations::computeRenderTarget()
 		createFootPrintOnRenderTarget();
 		return true;
 	}
+
 	return false;
 }
 
@@ -80,18 +81,19 @@ bool URenderTargetComputations::hasHitComponentRenderTarget()
 
 void URenderTargetComputations::createFootPrintOnRenderTarget()
 {
-
 	UCanvas* Canvas = nullptr;
 	FVector2D ScreenSize = FVector2D(0, 0);
 	FDrawToRenderTargetContext Context;
 	FVector2D CoordinatePosition = FVector2D(0, 0);
 	ACharacter* Player = FootPrintComponent->getPlayer();
+	FVector ActorScale = FootPrintComponent->getFootOnGround()->getHitresult()->GetActor()->GetActorScale();
 
 	UKismetRenderingLibrary::BeginDrawCanvasToRenderTarget(Player, RenderTargetOfHitMaterial, Canvas, ScreenSize, Context);
 
 	FVector2D ScreenPosition = InitComputationOfRenderTargetScreenPosition();
-	ScreenSize = ComputeRenderTargetScreenSize();
-	Canvas->K2_DrawMaterial(FootPrintComponent->M_Spot, ScreenPosition, ScreenSize, CoordinatePosition);
+	ScreenSize = ComputeRenderTargetScreenSize(ActorScale);
+	Canvas->K2_DrawMaterial(FootPrintComponent->M_Spot, ScreenPosition, ScreenSize, CoordinatePosition,FVector2D::UnitVector, FootPrintComponent->getFootOnGround()->getRotation().Yaw );
+
 
 	UKismetRenderingLibrary::EndDrawCanvasToRenderTarget(Player, Context);
 	RenderTargetOfHitMaterial = nullptr;
@@ -106,6 +108,7 @@ FVector2D URenderTargetComputations::InitComputationOfRenderTargetScreenPosition
 	FVector HitLocation = FootOnGround->getHitresult()->Location;
 	FVector ActorBounds;
 	FVector ActorBoundsOrigin;
+	
 
 	FootOnGround->getHitresult()->GetActor()->GetActorBounds(true, ActorBoundsOrigin, ActorBounds);
 
@@ -115,10 +118,11 @@ FVector2D URenderTargetComputations::InitComputationOfRenderTargetScreenPosition
 
 }
 
-FVector2D URenderTargetComputations::ComputeRenderTargetScreenSize() {
+FVector2D URenderTargetComputations::ComputeRenderTargetScreenSize(FVector ActorScale) {
 	int32 XSize = RenderTargetOfHitMaterial->SizeX;
 	int32 YSize = RenderTargetOfHitMaterial->SizeY;
-	FVector2D ScreenSize = FVector2D(XSize * 0.01, YSize * 0.01);
+
+	FVector2D ScreenSize = FVector2D(XSize * (1/ ActorScale.X), YSize * (1/ActorScale.Y));
 	return ScreenSize;
 }
 
@@ -126,20 +130,24 @@ FVector2D URenderTargetComputations::ComputeScreenPositionOnRenderTarget(FVector
 
 	int32 XSizeOfRT = RenderTargetOfHitMaterial->SizeX;
 	int32 YSizeOfRT = RenderTargetOfHitMaterial->SizeY;
-	FVector2D RenderTargetSize = FVector2D(XSizeOfRT, YSizeOfRT);
-
+	//FVector2D RenderTargetSize = FVector2D(XSizeOfRT, YSizeOfRT);
+	FVector ActorScale = FootPrintComponent->getFootOnGround()->getHitresult()->GetActor()->GetActorScale();
 	FVector2D ActorLocation2D = Get2DVectorWithXAndYFrom3DVector(ActorLocation);
 	FVector2D HitLocation2D = Get2DVectorWithXAndYFrom3DVector(HitLocation);
 	FVector2D ActorBounds2D = Get2DVectorWithXAndYFrom3DVector(ActorBounds);
 
+
 	ActorBounds2D *= 2;
 	FVector2D ScreenPosition = ActorLocation2D - HitLocation2D;
-	ScreenPosition.X = UKismetMathLibrary::Abs(ScreenPosition.X / ActorBounds2D.X);
-	ScreenPosition.Y = UKismetMathLibrary::Abs(ScreenPosition.Y / ActorBounds2D.Y);
+	float PercentX = UKismetMathLibrary::Abs(ScreenPosition.X / ActorBounds2D.X);
+	float PercentY = UKismetMathLibrary::Abs(ScreenPosition.Y / ActorBounds2D.Y);
 
-	FVector2D ScreenPositionPart1 = FVector2D(XSizeOfRT * (ScreenPosition.X - 0.5), YSizeOfRT * (ScreenPosition.Y - 0.5));
-	FVector2D ScreenPositionPart2 = FVector2D(XSizeOfRT * 0.5 * 0.99, YSizeOfRT * 0.5 * 0.99);
-	ScreenPosition = ScreenPositionPart1 + ScreenPositionPart2;
+	//FVector2D ScreenPositionPart1 = FVector2D(XSizeOfRT * (ScreenPosition.X - 0.5), YSizeOfRT * (ScreenPosition.Y - 0.5));
+	//FVector2D ScreenPositionPart2 = FVector2D(XSizeOfRT * 0.5 * (1-(1/ActorScale.X)), YSizeOfRT * 0.5 * (1-(1/ActorScale.Y)));
+	//ScreenPosition = ScreenPositionPart1 + ScreenPositionPart2;
+	//new calculation
+	ScreenPosition = FVector2D(XSizeOfRT * PercentX , YSizeOfRT * PercentY);
+	ScreenPosition = FVector2D(ScreenPosition.X - ScreenPosition.X * (1 / ActorScale.X), ScreenPosition.Y - ScreenPosition.Y * (1 / ActorScale.Y));
 	//ScreenPosition = RenderTargetSize - ScreenPosition;
 	return ScreenPosition;
 }

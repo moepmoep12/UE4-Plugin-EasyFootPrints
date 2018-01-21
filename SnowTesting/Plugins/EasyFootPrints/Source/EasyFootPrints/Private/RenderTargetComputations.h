@@ -31,7 +31,7 @@ protected:
 	bool hasHitComponentRenderTarget();
 	void createFootPrintOnRenderTarget();
 	FVector2D InitComputationOfRenderTargetScreenPosition();
-	FVector2D ComputeRenderTargetScreenSize();
+	FVector2D ComputeRenderTargetScreenSize(FVector ActorScale);
 	FVector2D ComputeScreenPositionOnRenderTarget(FVector ActorLocation, FVector HitLocation, FVector ActorBounds);
 	FVector2D Get2DVectorWithXAndYFrom3DVector(FVector VectorToBeComputed);
 

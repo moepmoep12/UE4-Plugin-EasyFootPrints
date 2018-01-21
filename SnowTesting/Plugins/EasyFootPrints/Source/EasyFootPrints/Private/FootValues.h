@@ -13,8 +13,10 @@ struct FFootPrintValues
 {
 	GENERATED_BODY()
 
-	FVector ForwardVector;
-	TArray<UFoot*> TrackedFeet;
+	UPROPERTY()
+		FVector ForwardVector;
+	UPROPERTY()
+		TArray<UFoot*> TrackedFeet;
 	
 
 	FVector getForwardVector() { return ForwardVector; }

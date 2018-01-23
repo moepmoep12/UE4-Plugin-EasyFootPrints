@@ -79,3 +79,10 @@ float UFoot::getDepth()
 	HitMaterial->GetScalarParameterValue(FName("Depth"), depth);
 	return depth; 
 }
+
+float UFoot::getTessellationHeight() {
+
+	float tessellationHeight = 0;
+	HitMaterial->GetScalarParameterValue(FName("TessellationHeight"), tessellationHeight);
+	return tessellationHeight;
+}

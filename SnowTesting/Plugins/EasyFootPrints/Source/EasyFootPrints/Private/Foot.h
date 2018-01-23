@@ -61,8 +61,9 @@ public:
 	FHitResult* getHitresult() { return &Hitresult; }
 	FLinearColor const getBaseColor() { return CurrentMaterial; }
 	float const getFootPollution() { return FootPollution; }
+	UMaterialInterface* getHitMaterial() { return HitMaterial; };
 	float getDepth();
-
+	float getTessellationHeight();
 	void setLocation(FVector loc) { Location = loc; }
 	void setRotation(FFootPrintValues values);
 	void setBoneName(FName name) { Name = name; }

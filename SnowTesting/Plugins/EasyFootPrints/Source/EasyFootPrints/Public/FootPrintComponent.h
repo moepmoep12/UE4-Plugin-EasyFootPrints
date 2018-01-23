@@ -49,6 +49,12 @@ private:
 		UCharacterMovementComponent* MovementComponent;
 	UPROPERTY()
 		URenderTargetComputations* RenderTargetComputations;
+	UPROPERTY()
+		UParticleSystem* FootprintParticleSystemSnow;
+	UPROPERTY()
+		UParticleSystem* FootprintParticleSystemSand;
+	UPROPERTY()
+		UParticleSystemComponent* FootprintParticleSystemComponent;
 
 protected:
 	// Called when the game starts
@@ -62,7 +68,9 @@ protected:
 	void resetJumpVelocity();
 	void adjustMaxWalkSpeed(float depth);
 	void adjustJumpVelocity(float depth);
-	
+	void EmittingParticleEffect(FVector Location);
+	void EmittingParticleEffectWithPollution(FVector Location);
+	void InitFootprintParticleSystems();
 
 public:
 	// Called every frame

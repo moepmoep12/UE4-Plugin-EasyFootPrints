@@ -16,6 +16,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "RenderTargetComputations.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h"
+#include "Runtime/Engine/Classes/Particles/ParticleSystemComponent.h"
 
 
 // Sets default values for this component's properties
@@ -24,6 +26,7 @@ UFootPrintComponent::UFootPrintComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 	FootValues = FFootPrintValues();
 	//SoundManager = NewObject<USoundManager>();
+	InitFootprintParticleSystems();
 
 }
 
@@ -71,6 +74,7 @@ void UFootPrintComponent::OnFootDown()
 	if (RenderTargetComputations->computeRenderTarget())
 	{
 		AdjustCharacterMovement();
+		EmittingParticleEffect(FootOnGround->getHitresult()->Location);
 	}
 
 	else
@@ -81,11 +85,11 @@ void UFootPrintComponent::OnFootDown()
 		if (FootOnGround->HasPollution())
 		{
 			CreatePollutionFootPrint();
+			EmittingParticleEffectWithPollution(FootOnGround->getHitresult()->Location);
 		}
 	}
 
-	//SoundManager->PlayFootprintSound();
-
+	//SoundManager->PlayFootprintSound(FootOnGround->getHitresult()->Location);
 }
 
 void UFootPrintComponent::AdjustCharacterMovement()
@@ -246,3 +250,43 @@ void UFootPrintComponent::adjustJumpVelocity(float depth)
 		CurrentJumpVelocity = adjustedJumpVelocity;
 	}
 }
+
+void UFootPrintComponent::EmittingParticleEffect(FVector Location) {
+	UMaterialInterface* Material = FootOnGround->getHitMaterial();
+	float tessellationHeight = FootOnGround->getTessellationHeight();
+	FVector FPPLocation = FVector(Location.X, Location.Y, Location.Z + tessellationHeight);
+	//UE_LOG(LogTemp, Warning, TEXT("Material Name is %s"), *Material->GetName());
+	if (Material->GetName().Equals(FString(TEXT("LandscapeMaterialInstanceConstant_66")))) {
+		if (FootprintParticleSystemSand != nullptr) {
+			FootprintParticleSystemComponent = UGameplayStatics::SpawnEmitterAtLocation(this, FootprintParticleSystemSand, FPPLocation);
+		}
+	}
+	else {
+		if (FootprintParticleSystemSnow != nullptr) {
+			FootprintParticleSystemComponent = UGameplayStatics::SpawnEmitterAtLocation(this, FootprintParticleSystemSnow, FPPLocation);
+		}
+	}
+}
+
+void UFootPrintComponent::EmittingParticleEffectWithPollution(FVector Location) {
+	if (FootprintParticleSystemSnow != nullptr) {
+		FootprintParticleSystemComponent = UGameplayStatics::SpawnEmitterAtLocation(this, FootprintParticleSystemSnow, Location);
+	}
+}
+
+void  UFootPrintComponent::InitFootprintParticleSystems() {
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> FootprintParticles1(TEXT("ParticleSystem'/EasyFootPrints/ParticleEffects/ImpactEffectSnow.ImpactEffectSnow'"));
+	if (!FootprintParticles1.Object) {
+		UE_LOG(LogTemp, Warning, TEXT("FootprintParticleSnow == nullptr"))
+			return;
+	}
+	FootprintParticleSystemSnow = FootprintParticles1.Object;
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> FootprintParticles2(TEXT("ParticleSystem'/EasyFootPrints/ParticleEffects/ImpactEffectSand.ImpactEffectSand'"));
+	if (!FootprintParticles2.Object) {
+		UE_LOG(LogTemp, Warning, TEXT("FootprintParticleSand == nullptr"))
+			return;
+	}
+	FootprintParticleSystemSand = FootprintParticles2.Object;
+}
+

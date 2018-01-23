@@ -67,7 +67,7 @@ void USoundManager::PlayFootprintSound(FVector SoundLocation) {
 		UE_LOG(LogTemp, Warning, TEXT("PlayedSound"))
 		float VolumeMultiplier = 4.0;
 		float PitchMultiplier = 1.0;
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), FootprintSoundBase, SoundLocation, VolumeMultiplier, PitchMultiplier);
+		UGameplayStatics::PlaySoundAtLocation(this, FootprintSoundBase, SoundLocation, VolumeMultiplier, PitchMultiplier);
 	}
 }
 

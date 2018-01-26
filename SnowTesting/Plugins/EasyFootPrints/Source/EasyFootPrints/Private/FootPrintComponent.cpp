@@ -12,12 +12,11 @@
 #include "Engine/World.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "SoundManager.h"
-#include "GameFramework/PawnMovementComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "RenderTargetComputations.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h"
 #include "Runtime/Engine/Classes/Particles/ParticleSystemComponent.h"
+#include "Default Components/DefaultRenderTargetComponent.h"
+#include "Default Components/DefaultMovementAdjustmentComp.h"
 
 
 // Sets default values for this component's properties
@@ -39,14 +38,22 @@ void UFootPrintComponent::BeginPlay()
 
 		if (!Player) {
 			Player = GetWorld()->GetFirstPlayerController()->GetCharacter();
-			MovementComponent = Cast<UCharacterMovementComponent>(Player->GetMovementComponent());
-			OriginaMaxWalkingSpeed = MovementComponent->MaxWalkSpeed;
-			OriginalJumpVelocity = MovementComponent->JumpZVelocity;
-			RenderTargetComputations = NewObject<URenderTargetComputations>();
-			RenderTargetComputations->initRenderTargetComputations(this);
 		}
 
+	initComponents();
 	//SoundManager->InitFootprintSound(Player);
+}
+
+void UFootPrintComponent::initComponents()
+{
+	if (!RenderTargetComponent) {
+		RenderTargetComputations = NewObject<UDefaultRenderTargetComponent>();
+	}
+
+	if (!AdjMovementComponent) {
+		MovementComputations = NewObject<UDefaultMovementAdjustmentComp>();
+		MovementComputations->initComponent(this);
+	}
 }
 
 
@@ -71,16 +78,15 @@ void UFootPrintComponent::OnFootDown()
 	Trace();
 	setFootOnGround();
 
-	if (RenderTargetComputations->computeRenderTarget())
+	if (RenderTargetComputations->drawOnRenderTarget(this))
 	{
-		AdjustCharacterMovement();
+		MovementComputations->adjustMovement();
 		EmittingParticleEffect(FootOnGround->getHitresult()->Location);
 	}
 
 	else
 	{
-		resetWalkSpeed();
-		resetJumpVelocity();
+		MovementComputations->resetMovement();
 
 		if (FootOnGround->HasPollution())
 		{
@@ -90,13 +96,6 @@ void UFootPrintComponent::OnFootDown()
 	}
 
 	//SoundManager->PlayFootprintSound(FootOnGround->getHitresult()->Location);
-}
-
-void UFootPrintComponent::AdjustCharacterMovement()
-{
-	float depth = FootOnGround->getDepth();
-	adjustMaxWalkSpeed(depth);
-	adjustJumpVelocity(depth);
 }
 
 
@@ -198,58 +197,6 @@ void UFootPrintComponent::CreatePollutionFootPrint()
 
 }
 
-void UFootPrintComponent::resetWalkSpeed()
-{
-	if (!MovementComponent) {
-		return;
-	}
-	if (MovementComponent->MaxWalkSpeed != OriginaMaxWalkingSpeed) {
-		//GEngine->AddOnScreenDebugMessage(3, 0.1, FColor::Red, FString("Reseting WalkSpeed"));
-		MovementComponent->MaxWalkSpeed = OriginaMaxWalkingSpeed;
-	}
-
-	CurrentMaxWalkSpeed = OriginaMaxWalkingSpeed;
-}
-
-void UFootPrintComponent::resetJumpVelocity()
-{
-	if (!MovementComponent) {
-		return;
-	}
-
-	if (MovementComponent->JumpZVelocity != CurrentJumpVelocity) {
-		MovementComponent->JumpZVelocity = OriginalJumpVelocity;
-	}
-
-	CurrentJumpVelocity = OriginalJumpVelocity;
-}
-
-void UFootPrintComponent::adjustMaxWalkSpeed(float depth)
-{
-	if (!MovementComponent) {
-		return;
-	}
-
-	float adjustedWalkSpeed = OriginaMaxWalkingSpeed * (1 / depth);
-
-	if (adjustedWalkSpeed != CurrentMaxWalkSpeed) {
-		Cast<UCharacterMovementComponent>(Player->GetMovementComponent())->MaxWalkSpeed = adjustedWalkSpeed;
-		CurrentMaxWalkSpeed = adjustedWalkSpeed;
-	}
-}
-
-void UFootPrintComponent::adjustJumpVelocity(float depth)
-{
-	if (!MovementComponent) {
-		return;
-	}
-
-	float adjustedJumpVelocity = OriginalJumpVelocity * (1 / depth);
-	if (adjustedJumpVelocity != CurrentJumpVelocity) {
-		Cast<UCharacterMovementComponent>(Player->GetMovementComponent())->JumpZVelocity = adjustedJumpVelocity;
-		CurrentJumpVelocity = adjustedJumpVelocity;
-	}
-}
 
 void UFootPrintComponent::EmittingParticleEffect(FVector Location) {
 	UMaterialInterface* Material = FootOnGround->getHitMaterial();

@@ -6,6 +6,7 @@
 #include "Runtime/Engine/Classes/Sound/SoundCue.h"
 #include "Components/ActorComponent.h"
 #include "FootValues.h"
+#include "BaseRenderTargetComponent.h"
 #include "FootPrintComponent.generated.h"
 
 /* Forward Declaration */
@@ -27,6 +28,15 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere)
 		UMaterialInterface* M_Spot;
 
+	/*	custom components can be set via blueprint in the component section of FootPrintComponent
+	/	they will change the behaviour of the plugin according to the implementation
+	/	if null, the default component will be used
+	*/
+	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = Components)
+		TSubclassOf<class UBaseRenderTargetComponent> RenderTargetComponent;
+	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = Components)
+		TSubclassOf<class UBaseMovementAdjustmentComponent> AdjMovementComponent;
+
 
 private:
 	UPROPERTY()
@@ -38,17 +48,9 @@ private:
 	UPROPERTY()
 		USoundManager* SoundManager;
 	UPROPERTY()
-		float OriginaMaxWalkingSpeed;
+		UBaseRenderTargetComponent* RenderTargetComputations;
 	UPROPERTY()
-		float CurrentMaxWalkSpeed;
-	UPROPERTY()
-		float OriginalJumpVelocity;
-	UPROPERTY()
-		float CurrentJumpVelocity;
-	UPROPERTY()
-		UCharacterMovementComponent* MovementComponent;
-	UPROPERTY()
-		URenderTargetComputations* RenderTargetComputations;
+		UBaseMovementAdjustmentComponent* MovementComputations;
 	UPROPERTY()
 		UParticleSystem* FootprintParticleSystemSnow;
 	UPROPERTY()
@@ -64,13 +66,10 @@ protected:
 	void Trace();
 	void setFootOnGround();
 	void CreatePollutionFootPrint();
-	void resetWalkSpeed();
-	void resetJumpVelocity();
-	void adjustMaxWalkSpeed(float depth);
-	void adjustJumpVelocity(float depth);
 	void EmittingParticleEffect(FVector Location);
 	void EmittingParticleEffectWithPollution(FVector Location);
 	void InitFootprintParticleSystems();
+	void initComponents();
 
 public:
 	// Called every frame
@@ -80,7 +79,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Create 2D Footprint", Keywords = "print plugin"), Category = "EasyFootPrints")
 		void OnFootDown();
-	void AdjustCharacterMovement();
 	UFUNCTION()
 		UFoot* getFootOnGround() { return FootOnGround; };
 	UFUNCTION()

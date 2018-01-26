@@ -3,27 +3,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
-#include "FootPrintComponent.h"
-#include "RenderTargetComputations.generated.h"
+#include "Base Abstract Components/BaseRenderTargetComponent.h"
+#include "DefaultRenderTargetComponent.generated.h"
 
-class UMaterialInterface;
-
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class URenderTargetComputations : public UActorComponent
+/**
+ * 
+ */
+UCLASS()
+class UDefaultRenderTargetComponent : public UBaseRenderTargetComponent
 {
 	GENERATED_BODY()
-
-public:	
-	// Sets default values for this component's properties
-	URenderTargetComputations();
-
 private:
 	UPROPERTY()
 		UFootPrintComponent* FootPrintComponent;
 	UPROPERTY()
 		UTextureRenderTarget2D* RenderTargetOfHitMaterial = nullptr;
-	
 
 protected:
 	// Called when the game starts
@@ -34,14 +28,8 @@ protected:
 	FVector2D ComputeRenderTargetScreenSize(FVector ActorScale);
 	FVector2D ComputeScreenPositionOnRenderTarget(FVector ActorLocation, FVector HitLocation, FVector ActorBounds);
 	FVector2D Get2DVectorWithXAndYFrom3DVector(FVector VectorToBeComputed);
-
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	void initRenderTargetComputations(UFootPrintComponent* comp) { FootPrintComponent = comp; };
-	bool computeRenderTarget();
 	
+public:
+	 bool drawOnRenderTarget(UFootPrintComponent* FPComp) override;
 
-		
-	
 };

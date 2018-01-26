@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "MaterialInfo.h"
 #include "Foot.generated.h"
 
 /**

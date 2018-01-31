@@ -8,6 +8,7 @@
 #include "FootValues.h"
 #include "Default Components/DefaultMovementAdjustmentComp.h"
 #include "Default Components/DefaultRenderTargetComponent.h"
+#include "Default Components/DefaultParticleSystemComponent.h"
 #include "FootPrintComponent.generated.h"
 
 /* Forward Declaration */
@@ -35,6 +36,8 @@ public:
 		TSubclassOf<class UBaseRenderTargetComponent> RenderTargetComponent = UDefaultRenderTargetComponent::StaticClass();
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = Components)
 		TSubclassOf<class UBaseMovementAdjustmentComponent> AdjMovementComponent = UDefaultMovementAdjustmentComp::StaticClass();
+	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = Components)
+		TSubclassOf<class UBaseParticleSystemComponent> ParticleSystemComponent = UDefaultParticleSystemComponent::StaticClass();
 
 
 private:
@@ -51,7 +54,7 @@ private:
 	UPROPERTY()
 		UBaseMovementAdjustmentComponent* MovementComputations;
 	UPROPERTY()
-		UParticleSystem* CurrentFootprintParticleSystem;
+		UBaseParticleSystemComponent* ParticleSystem;
 
 protected:
 	// Called when the game starts
@@ -62,9 +65,8 @@ protected:
 	void setFootOnGround();
 	void drawOnRenderTarget();
 	void CreatePollutionFootPrint();
-	void EmittingParticleEffect(FVector Location);
-	void EmittingParticleEffectWithPollution(FVector Location);
 	void initComponents();
+	void emittParticleEffect();
 
 public:
 	// Called every frame

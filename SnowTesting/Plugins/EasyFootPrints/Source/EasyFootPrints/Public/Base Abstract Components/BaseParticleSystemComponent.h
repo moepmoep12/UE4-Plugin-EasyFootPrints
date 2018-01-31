@@ -4,18 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "RenderTargetValues.h"
-#include "BaseRenderTargetComponent.generated.h"
-
-class UFootPrintComponent;
+#include "BaseParticleSystemComponent.generated.h"
 
 
 UCLASS( ClassGroup=(EasyFootPrints), abstract )
-class EASYFOOTPRINTS_API UBaseRenderTargetComponent : public UActorComponent
+class EASYFOOTPRINTS_API UBaseParticleSystemComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-
+	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override {};
@@ -23,8 +20,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override {};
-	virtual void drawOnRenderTarget(UMaterialInterface* MaterialToDraw, FRenderTargetValues* RenderTargetValues) {};
-	
+	virtual void spawnParticleEmitter(FVector Location, float TessellationHeight , UParticleSystem* ParticleEffect) {};
 		
 	
 };

@@ -77,6 +77,7 @@ public:
 	float getDepth();
 	float getTessellationHeight();
 	FRenderTargetValues* getRenderTargetValues();
+	UParticleSystem* getParticleEffect();
 
 	void setLocation(FVector loc) { Location = loc; }
 	void setRotation(FFootPrintValues values);

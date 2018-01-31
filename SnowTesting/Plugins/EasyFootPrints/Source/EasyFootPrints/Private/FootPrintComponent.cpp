@@ -10,13 +10,11 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Engine/World.h"
-#include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "SoundManager.h"
 #include "Materials/MaterialInstanceDynamic.h"
-#include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h"
-#include "Runtime/Engine/Classes/Particles/ParticleSystemComponent.h"
 #include "Default Components/DefaultRenderTargetComponent.h"
 #include "Default Components/DefaultMovementAdjustmentComp.h"
+#include "Default Components/DefaultParticleSystemComponent.h"
 #include "PhysMaterial_EasyFootPrints.h"
 
 
@@ -47,6 +45,7 @@ void UFootPrintComponent::initComponents()
 {
 	RenderTargetComputations = NewObject<UBaseRenderTargetComponent>(this, RenderTargetComponent);
 	MovementComputations = NewObject<UBaseMovementAdjustmentComponent>(this, AdjMovementComponent);
+	ParticleSystem = NewObject<UBaseParticleSystemComponent>(this, ParticleSystemComponent);
 	MovementComputations->initComponent(this);
 }
 
@@ -77,7 +76,7 @@ void UFootPrintComponent::OnFootDown()
 		drawOnRenderTarget();
 		FootOnGround->IncreaseFootPollution();
 		MovementComputations->adjustMovement();
-		EmittingParticleEffect(FootOnGround->getHitresult()->Location);
+		emittParticleEffect();
 		SoundManager->PlayFootprintSound(FootOnGround, this);
 	}
 
@@ -88,7 +87,7 @@ void UFootPrintComponent::OnFootDown()
 		if (FootOnGround->HasPollution())
 		{
 			CreatePollutionFootPrint();
-			EmittingParticleEffectWithPollution(FootOnGround->getHitresult()->Location);
+			emittParticleEffect();
 			SoundManager->PlayFootprintSoundWithPollution(FootOnGround, this);
 		}
 	}
@@ -198,7 +197,14 @@ void UFootPrintComponent::CreatePollutionFootPrint()
 
 }
 
+void UFootPrintComponent::emittParticleEffect()
+{
+	FVector Location = FootOnGround->getLocation();
+	float height = FootOnGround->getTessellationHeight();
+	ParticleSystem->spawnParticleEmitter(Location, height, FootOnGround->getParticleEffect());
+}
 
+/*
 void UFootPrintComponent::EmittingParticleEffect(FVector Location) {
 	float tessellationHeight = FootOnGround->getTessellationHeight();
 	FVector FPPLocation = FVector(Location.X, Location.Y, Location.Z + tessellationHeight);
@@ -218,4 +224,4 @@ void UFootPrintComponent::EmittingParticleEffectWithPollution(FVector Location) 
 		UGameplayStatics::SpawnEmitterAtLocation(this, CurrentFootprintParticleSystem, Location);
 	}
 }
-
+*/

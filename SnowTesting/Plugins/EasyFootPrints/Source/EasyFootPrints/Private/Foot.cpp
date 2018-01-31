@@ -85,8 +85,10 @@ float UFoot::getDepth()
 float UFoot::getTessellationHeight() {
 
 	float tessellationHeight = 0;
-	HitMaterial->GetScalarParameterValue(FName("TessellationHeight"), tessellationHeight);
-	return tessellationHeight;
+	if (HitMaterial) {
+		return HitMaterial->GetScalarParameterValue(FName("TessellationHeight"), tessellationHeight) ? tessellationHeight : 0.0f;
+	}
+	return 0.0f;
 }
 
 bool UFoot::hasHitComponentRenderTarget()
@@ -142,4 +144,10 @@ void UFoot::updateRenderTargetValues()
 	RenderTargetValues.HitLocation = FVector2D(Hitresult.Location.X, Hitresult.Location.Y);
 	RenderTargetValues.Rotation = Rotation.Yaw;
 	RenderTargetValues.Density = (PhysMat!=nullptr) ? PhysMat->Density : 0;
+}
+
+UParticleSystem * UFoot::getParticleEffect()
+{
+
+	return PhysMat!= nullptr ? PhysMat->ParticleSystem : nullptr;
 }

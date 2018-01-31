@@ -6,14 +6,13 @@
 #include "Runtime/Engine/Classes/Sound/SoundCue.h"
 #include "Components/ActorComponent.h"
 #include "FootValues.h"
-#include "BaseRenderTargetComponent.h"
+#include "Default Components/DefaultMovementAdjustmentComp.h"
+#include "Default Components/DefaultRenderTargetComponent.h"
 #include "FootPrintComponent.generated.h"
 
 /* Forward Declaration */
-class UTextureRenderTarget2D;
 class USoundManager;
-class UCharacterMovementComponent;
-class URenderTargetComputations;
+
 
 UCLASS(ClassGroup = (EasyFootPrints), meta = (BlueprintSpawnableComponent))
 class EASYFOOTPRINTS_API UFootPrintComponent : public UActorComponent
@@ -28,14 +27,14 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere)
 		UMaterialInterface* M_Spot;
 
-	/*	custom components can be set via blueprint in the component section of FootPrintComponent
-	/	they will change the behaviour of the plugin according to the implementation
-	/	if null, the default component will be used
+	/*
+	/	this represents the default components the plugin will be using
+	/	custom components can be set via blueprint
 	*/
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = Components)
-		TSubclassOf<class UBaseRenderTargetComponent> RenderTargetComponent;
+		TSubclassOf<class UBaseRenderTargetComponent> RenderTargetComponent = UDefaultRenderTargetComponent::StaticClass();
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = Components)
-		TSubclassOf<class UBaseMovementAdjustmentComponent> AdjMovementComponent;
+		TSubclassOf<class UBaseMovementAdjustmentComponent> AdjMovementComponent = UDefaultMovementAdjustmentComp::StaticClass();
 
 
 private:
@@ -61,6 +60,7 @@ protected:
 	void initFeet();
 	void Trace();
 	void setFootOnGround();
+	void drawOnRenderTarget();
 	void CreatePollutionFootPrint();
 	void EmittingParticleEffect(FVector Location);
 	void EmittingParticleEffectWithPollution(FVector Location);

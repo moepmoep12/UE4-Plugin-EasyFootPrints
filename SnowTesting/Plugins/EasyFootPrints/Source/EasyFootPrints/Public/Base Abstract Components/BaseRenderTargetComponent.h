@@ -4,9 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "RenderTargetValues.h"
 #include "BaseRenderTargetComponent.generated.h"
 
 class UFootPrintComponent;
+
 
 UCLASS( ClassGroup=(EasyFootPrints), abstract )
 class EASYFOOTPRINTS_API UBaseRenderTargetComponent : public UActorComponent
@@ -24,7 +26,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override {};
-	virtual bool drawOnRenderTarget(UFootPrintComponent* FPComp) { return false; };
+	virtual void drawOnRenderTarget(UMaterialInterface* MaterialToDraw, FRenderTargetValues* RenderTargetValues) {};
 	
 		
 	

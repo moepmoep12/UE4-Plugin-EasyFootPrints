@@ -4,9 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "FootPrintComponent.h"
 #include "BaseMovementAdjustmentComponent.generated.h"
 
+// Forward Declaration
+class UFootPrintComponent;
 
 UCLASS( ClassGroup=(EasyFootPrints), abstract )
 class EASYFOOTPRINTS_API UBaseMovementAdjustmentComponent : public UActorComponent

@@ -13,23 +13,18 @@ UCLASS()
 class UDefaultRenderTargetComponent : public UBaseRenderTargetComponent
 {
 	GENERATED_BODY()
+
 private:
 	UPROPERTY()
-		UFootPrintComponent* FootPrintComponent;
-	UPROPERTY()
-		UTextureRenderTarget2D* RenderTargetOfHitMaterial = nullptr;
+		FRenderTargetValues RenderTargetValues;
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-	bool hasHitComponentRenderTarget();
-	void createFootPrintOnRenderTarget();
-	FVector2D InitComputationOfRenderTargetScreenPosition();
-	FVector2D ComputeRenderTargetScreenSize(FVector ActorScale);
-	FVector2D ComputeScreenPositionOnRenderTarget(FVector ActorLocation, FVector HitLocation, FVector ActorBounds);
-	FVector2D Get2DVectorWithXAndYFrom3DVector(FVector VectorToBeComputed);
+	FVector2D ComputeRenderTargetScreenSize();
+	FVector2D ComputeScreenPositionOnRenderTarget();
 	
 public:
-	 bool drawOnRenderTarget(UFootPrintComponent* FPComp) override;
+	 void drawOnRenderTarget(UMaterialInterface* MaterialToDraw, FRenderTargetValues* RenderTargetValues) override;
 
 };

@@ -3,12 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "RenderTargetValues.h"
 #include "Foot.generated.h"
 
 /**
  * 
  */
+class UTextureRenderTarget2D;
 struct FFootPrintValues;
+class UPhysMaterial_EasyFootPrints;
 
 UCLASS()
 class UFoot : public UObject
@@ -16,6 +19,14 @@ class UFoot : public UObject
 	GENERATED_BODY()
 
 private:
+	UPROPERTY()
+		UPhysMaterial_EasyFootPrints* PhysMat;
+	UPROPERTY()
+		FRenderTargetValues RenderTargetValues = FRenderTargetValues();
+
+	UPROPERTY()
+		UTextureRenderTarget2D* RenderTargetOfHitMaterial = nullptr;
+
 	UPROPERTY()
 		FVector Location;
 
@@ -52,6 +63,8 @@ private:
 	UFUNCTION()
 		void AddPollution();
 
+	void updateRenderTargetValues();
+
 
 public:
 	const FVector getLocation() { return Location; }
@@ -63,6 +76,8 @@ public:
 	UMaterialInterface* getHitMaterial() { return HitMaterial; };
 	float getDepth();
 	float getTessellationHeight();
+	FRenderTargetValues* getRenderTargetValues();
+
 	void setLocation(FVector loc) { Location = loc; }
 	void setRotation(FFootPrintValues values);
 	void setBoneName(FName name) { Name = name; }
@@ -71,4 +86,7 @@ public:
 	void IncreaseFootPollution();
 
 	void DecreaseFootPollution();
+
+	bool hasHitComponentRenderTarget();
+	void updateHitMaterial();
 };

@@ -4,10 +4,12 @@
 #include "FootValues.h"
 #include "Engine/GameEngine.h"
 #include "Components/PrimitiveComponent.h"
-#include "Materials/MaterialInterface.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "LandscapeComponent.h"
-
+#include "Engine/EngineTypes.h"
+#include "Materials/MaterialInterface.h"
+#include "PhysMaterial_EasyFootPrints.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
 
 
 void UFoot::setRotation(FFootPrintValues values)
@@ -38,7 +40,7 @@ void UFoot::DecreaseFootPollution()
 	float Subtractor = 1 - FMath::Exp(-CurrentPollutionScale / 5);
 	FootPollution = FMath::Clamp<float>(FootPollution - Subtractor, 0.0f, 1.0f);
 
-	if (FootPollution <= 0.0f) 
+	if (FootPollution <= 0.0f)
 	{
 		CurrentPollutionScale = 0.0f;
 		CurrentMaterial = FLinearColor(0, 0, 0, 0);
@@ -77,7 +79,7 @@ float UFoot::getDepth()
 {
 	float depth = 0;
 	HitMaterial->GetScalarParameterValue(FName("Depth"), depth);
-	return depth; 
+	return depth;
 }
 
 float UFoot::getTessellationHeight() {
@@ -85,4 +87,59 @@ float UFoot::getTessellationHeight() {
 	float tessellationHeight = 0;
 	HitMaterial->GetScalarParameterValue(FName("TessellationHeight"), tessellationHeight);
 	return tessellationHeight;
+}
+
+bool UFoot::hasHitComponentRenderTarget()
+{
+	return RenderTargetValues.RenderTargetOfHitMaterial != nullptr;
+}
+
+void UFoot::updateHitMaterial()
+{
+	if (Hitresult.Actor == nullptr) {
+		return;
+	}
+
+	UActorComponent* ActorComponent = nullptr;
+	ULandscapeComponent* LandscapeComponent = nullptr;
+	UTexture* RenderTexture = nullptr;
+	UMaterialInterface* MaterialOfHitComponent = nullptr;
+
+	ActorComponent = Hitresult.Actor->FindComponentByClass(ULandscapeComponent::StaticClass());
+	LandscapeComponent = Cast<ULandscapeComponent>(ActorComponent);
+
+	if (LandscapeComponent) {
+		MaterialOfHitComponent = LandscapeComponent->GetLandscapeMaterial();
+		MaterialOfHitComponent->GetTextureParameterValue(FName("RenderTarget"), RenderTexture);
+	}
+
+	HitMaterial = MaterialOfHitComponent;
+	if (HitMaterial) {
+		PhysMat = Cast<UPhysMaterial_EasyFootPrints>(HitMaterial->GetPhysicalMaterial());
+	}
+	RenderTargetValues.RenderTargetOfHitMaterial = Cast<UTextureRenderTarget2D>(RenderTexture);
+	
+}
+
+FRenderTargetValues * UFoot::getRenderTargetValues()
+{
+	updateRenderTargetValues();
+	return &RenderTargetValues;
+}
+
+void UFoot::updateRenderTargetValues()
+{
+	if (Hitresult.Actor == nullptr) {
+		RenderTargetValues.clear();
+		return;
+	}
+	FVector ActorBounds;
+	FVector ActorOrigins;
+	Hitresult.Actor->GetActorBounds(true, ActorOrigins, ActorBounds);
+	RenderTargetValues.ActorBounds = FVector2D(ActorBounds.X * 2, ActorBounds.Y * 2);
+	RenderTargetValues.ActorLocation = FVector2D(Hitresult.Actor->GetActorLocation().X, Hitresult.Actor->GetActorLocation().Y);
+	RenderTargetValues.ActorScale = FVector2D(Hitresult.Actor->GetActorScale().X, Hitresult.Actor->GetActorScale().Y);
+	RenderTargetValues.HitLocation = FVector2D(Hitresult.Location.X, Hitresult.Location.Y);
+	RenderTargetValues.Rotation = Rotation.Yaw;
+	RenderTargetValues.Density = (PhysMat!=nullptr) ? PhysMat->Density : 0;
 }

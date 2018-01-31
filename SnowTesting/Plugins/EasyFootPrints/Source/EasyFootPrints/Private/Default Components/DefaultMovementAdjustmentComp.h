@@ -6,9 +6,8 @@
 #include "Base Abstract Components/BaseMovementAdjustmentComponent.h"
 #include "DefaultMovementAdjustmentComp.generated.h"
 
-/**
- * 
- */
+class UCharacterMovementComponent;
+
 UCLASS()
 class UDefaultMovementAdjustmentComp : public UBaseMovementAdjustmentComponent
 {
@@ -34,8 +33,8 @@ protected:
 
 
 public:
-	void initComponent(UFootPrintComponent* FPComp) override;
-	void adjustMovement() override;
-	void resetMovement() override;
+	virtual void initComponent(UFootPrintComponent* FPComp) override;
+	virtual void adjustMovement() override;
+	virtual void resetMovement() override;
 	
 };

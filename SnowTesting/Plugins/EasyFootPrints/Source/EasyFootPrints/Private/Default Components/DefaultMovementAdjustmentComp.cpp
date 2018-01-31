@@ -3,6 +3,7 @@
 #include "DefaultMovementAdjustmentComp.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "FootPrintComponent.h"
 
 void UDefaultMovementAdjustmentComp::initComponent(UFootPrintComponent * FPComp)
 {

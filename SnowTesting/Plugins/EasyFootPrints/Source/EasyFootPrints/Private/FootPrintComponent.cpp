@@ -34,25 +34,20 @@ UFootPrintComponent::UFootPrintComponent()
 void UFootPrintComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	UE_LOG(LogTemp, Warning, TEXT("Begin Play"))
 
 		if (!Player) {
 			Player = GetWorld()->GetFirstPlayerController()->GetCharacter();
 		}
 
 	initComponents();
+	initFeet();
 }
 
 void UFootPrintComponent::initComponents()
 {
-	if (!RenderTargetComponent) {
-		RenderTargetComputations = NewObject<UDefaultRenderTargetComponent>();
-	}
-
-	if (!AdjMovementComponent) {
-		MovementComputations = NewObject<UDefaultMovementAdjustmentComp>();
-		MovementComputations->initComponent(this);
-	}
+	RenderTargetComputations = NewObject<UBaseRenderTargetComponent>(this, RenderTargetComponent);
+	MovementComputations = NewObject<UBaseMovementAdjustmentComponent>(this, AdjMovementComponent);
+	MovementComputations->initComponent(this);
 }
 
 
@@ -77,8 +72,10 @@ void UFootPrintComponent::OnFootDown()
 	Trace();
 	setFootOnGround();
 
-	if (RenderTargetComputations->drawOnRenderTarget(this))
+	if (FootOnGround->hasHitComponentRenderTarget())
 	{
+		drawOnRenderTarget();
+		FootOnGround->IncreaseFootPollution();
 		MovementComputations->adjustMovement();
 		EmittingParticleEffect(FootOnGround->getHitresult()->Location);
 		SoundManager->PlayFootprintSound(FootOnGround, this);
@@ -98,20 +95,16 @@ void UFootPrintComponent::OnFootDown()
 
 }
 
+void UFootPrintComponent::drawOnRenderTarget()
+{
+	FRenderTargetValues* RenderTargetValues = FootOnGround->getRenderTargetValues();
+	RenderTargetComputations->drawOnRenderTarget(M_Spot, RenderTargetValues);
+}
 
 
 /// <summary>  Calls the initFeet() method and sets location of every foot </summary> 
 void UFootPrintComponent::LoadFootPositions()
 {
-	if (BoneNames.Num() <= 0) {
-		UE_LOG(LogTemp, Warning, TEXT("Bone Amount is <= 0"))
-			return;
-	}
-
-	if (FootValues.TrackedFeet.Num() != BoneNames.Num())
-	{
-		initFeet();
-	}
 
 	for (UFoot* f : FootValues.TrackedFeet)
 	{
@@ -126,13 +119,21 @@ void UFootPrintComponent::LoadFootPositions()
 /// <summary> creates an Array of Feet with the specified Bones </summary>
 void UFootPrintComponent::initFeet()
 {
-	FootValues.TrackedFeet.Empty();
+	if (BoneNames.Num() <= 0) {
+		UE_LOG(LogTemp, Warning, TEXT("Bone Amount is <= 0"))
+			return;
+	}
 
-	for (FName name : BoneNames)
+	if (FootValues.TrackedFeet.Num() != BoneNames.Num())
 	{
-		UFoot* foot = NewObject<UFoot>();
-		foot->setBoneName(name);
-		FootValues.TrackedFeet.Add(foot);
+		FootValues.TrackedFeet.Empty();
+
+		for (FName name : BoneNames)
+		{
+			UFoot* foot = NewObject<UFoot>();
+			foot->setBoneName(name);
+			FootValues.TrackedFeet.Add(foot);
+		}
 	}
 }
 
@@ -174,6 +175,7 @@ void UFootPrintComponent::setFootOnGround()
 		}
 	}
 	FootOnGround = FootValues.TrackedFeet[key];
+	FootOnGround->updateHitMaterial();
 }
 
 void UFootPrintComponent::CreatePollutionFootPrint()

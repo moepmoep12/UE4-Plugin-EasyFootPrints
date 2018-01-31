@@ -25,7 +25,7 @@ UFootPrintComponent::UFootPrintComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	FootValues = FFootPrintValues();
-	//SoundManager = NewObject<USoundManager>();
+	SoundManager = NewObject<USoundManager>();
 
 }
 
@@ -41,7 +41,6 @@ void UFootPrintComponent::BeginPlay()
 		}
 
 	initComponents();
-	//SoundManager->InitFootprintSound(Player);
 }
 
 void UFootPrintComponent::initComponents()
@@ -82,6 +81,7 @@ void UFootPrintComponent::OnFootDown()
 	{
 		MovementComputations->adjustMovement();
 		EmittingParticleEffect(FootOnGround->getHitresult()->Location);
+		SoundManager->PlayFootprintSound(FootOnGround, this);
 	}
 
 	else
@@ -92,12 +92,11 @@ void UFootPrintComponent::OnFootDown()
 		{
 			CreatePollutionFootPrint();
 			EmittingParticleEffectWithPollution(FootOnGround->getHitresult()->Location);
+			SoundManager->PlayFootprintSoundWithPollution(FootOnGround, this);
 		}
 	}
 
-	//SoundManager->PlayFootprintSound(FootOnGround->getHitresult()->Location);
 }
-
 
 
 
@@ -199,11 +198,14 @@ void UFootPrintComponent::CreatePollutionFootPrint()
 
 
 void UFootPrintComponent::EmittingParticleEffect(FVector Location) {
-	UMaterialInterface* Material = FootOnGround->getHitMaterial();
 	float tessellationHeight = FootOnGround->getTessellationHeight();
 	FVector FPPLocation = FVector(Location.X, Location.Y, Location.Z + tessellationHeight);
+
+	UMaterialInterface* Material = FootOnGround->getHitMaterial();
 	UPhysMaterial_EasyFootPrints* PhysMat = Cast<UPhysMaterial_EasyFootPrints>(Material->GetPhysicalMaterial());
 	CurrentFootprintParticleSystem = PhysMat->ParticleSystem;
+
+
 	if (CurrentFootprintParticleSystem != nullptr) {
 		UGameplayStatics::SpawnEmitterAtLocation(this, CurrentFootprintParticleSystem, FPPLocation);
 	}

@@ -27,10 +27,8 @@ protected:
 
 public:
 
-	void PlayFootprintSoundALT();
-	void InitFootprintSound(ACharacter* Player);
-	void ChangeFootprintSound(FString NameOfNewSound);
-	void PlayFootprintSound(FVector SoundLocation);
+	void PlayFootprintSound(UFoot* FootOnGround, const UObject* Context);
+	void PlayFootprintSoundWithPollution(UFoot* FootOnGround, const UObject* Context);
 	USoundManager();
 	
 	

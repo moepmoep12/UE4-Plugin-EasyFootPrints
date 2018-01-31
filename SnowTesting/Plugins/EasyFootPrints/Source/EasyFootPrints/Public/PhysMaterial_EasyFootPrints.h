@@ -18,7 +18,7 @@ class EASYFOOTPRINTS_API UPhysMaterial_EasyFootPrints : public UPhysicalMaterial
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EasyFootPrints)
 		UParticleSystem* ParticleSystem;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EasyFootPrints)
 		USoundCue* FootstepSound;
 	
 };

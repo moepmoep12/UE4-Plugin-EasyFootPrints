@@ -52,11 +52,7 @@ private:
 	UPROPERTY()
 		UBaseMovementAdjustmentComponent* MovementComputations;
 	UPROPERTY()
-		UParticleSystem* FootprintParticleSystemSnow;
-	UPROPERTY()
-		UParticleSystem* FootprintParticleSystemSand;
-	UPROPERTY()
-		UParticleSystemComponent* FootprintParticleSystemComponent;
+		UParticleSystem* CurrentFootprintParticleSystem;
 
 protected:
 	// Called when the game starts
@@ -68,7 +64,6 @@ protected:
 	void CreatePollutionFootPrint();
 	void EmittingParticleEffect(FVector Location);
 	void EmittingParticleEffectWithPollution(FVector Location);
-	void InitFootprintParticleSystems();
 	void initComponents();
 
 public:

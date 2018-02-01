@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "RenderTargetValues.h"
+#include "Default Components/DefaultPollutionComponent.h"
 #include "Foot.generated.h"
 
 /**
@@ -21,6 +22,7 @@ class UFoot : public UObject
 private:
 	UPROPERTY()
 		UPhysMaterial_EasyFootPrints* PhysMat;
+
 	UPROPERTY()
 		FRenderTargetValues RenderTargetValues = FRenderTargetValues();
 
@@ -40,54 +42,34 @@ private:
 		FHitResult Hitresult = FHitResult(ForceInit);
 
 	UPROPERTY()
-		FLinearColor LastMaterialTouched;
-
-	UPROPERTY()
-		FLinearColor CurrentMaterial;
-
-	UPROPERTY()
-		float FootPollution = 0.0f;
-
-	UPROPERTY()
-		float CurrentPollutionScale = 0.0f;
+		UBasePollutionComponent* PollutionComponent;
 
 	UPROPERTY()
 		UMaterialInterface* HitMaterial;
 
-	UFUNCTION()
-		FLinearColor GetBaseColour();
-
-	UFUNCTION()
-		float GetPollutionScale();
-
-	UFUNCTION()
-		void AddPollution();
-
+protected:
 	void updateRenderTargetValues();
 
 
 public:
 	const FVector getLocation() { return Location; }
-	FRotator getRotation() { return Rotation; }
-	FName getBoneName() { return Name; }
 	FHitResult* getHitresult() { return &Hitresult; }
-	FLinearColor const getBaseColor() { return CurrentMaterial; }
-	float const getFootPollution() { return FootPollution; }
-	UMaterialInterface* getHitMaterial() { return HitMaterial; };
+	const FName getBoneName() { return Name; };
+	bool const HasPollution() { return PollutionComponent->hasPollution(); }
 	float getDepth();
 	float getTessellationHeight();
 	FRenderTargetValues* getRenderTargetValues();
 	UParticleSystem* getParticleEffect();
+	USoundBase* getFootPrintSound();
 
 	void setLocation(FVector loc) { Location = loc; }
 	void setRotation(FFootPrintValues values);
 	void setBoneName(FName name) { Name = name; }
-	void setHitMaterial(UMaterialInterface* hitMaterial) { HitMaterial = hitMaterial; }
-	bool const HasPollution() { return (FootPollution > 0.0f); }
+	
 	void IncreaseFootPollution();
-
-	void DecreaseFootPollution();
-
 	bool hasHitComponentRenderTarget();
 	void updateHitMaterial();
+	void initPollutionComponent(TSubclassOf<UBasePollutionComponent> PollutionComp);
+	void createPollutionFootPrint(UMaterialInterface* Material, UWorld* world);
+	
 };

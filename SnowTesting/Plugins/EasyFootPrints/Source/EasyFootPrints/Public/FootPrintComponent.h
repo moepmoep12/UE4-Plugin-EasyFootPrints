@@ -9,6 +9,8 @@
 #include "Default Components/DefaultMovementAdjustmentComp.h"
 #include "Default Components/DefaultRenderTargetComponent.h"
 #include "Default Components/DefaultParticleSystemComponent.h"
+#include "Default Components/DefaultPollutionComponent.h"
+#include "Default Components/DefaultSoundComponent.h"
 #include "FootPrintComponent.generated.h"
 
 /* Forward Declaration */
@@ -38,6 +40,10 @@ public:
 		TSubclassOf<class UBaseMovementAdjustmentComponent> AdjMovementComponent = UDefaultMovementAdjustmentComp::StaticClass();
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = Components)
 		TSubclassOf<class UBaseParticleSystemComponent> ParticleSystemComponent = UDefaultParticleSystemComponent::StaticClass();
+	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = Components)
+		TSubclassOf<class UBasePollutionComponent> PollutionComponent = UDefaultPollutionComponent::StaticClass();
+	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = Components)
+		TSubclassOf<class UBaseSoundComponent> SoundComponent = UDefaultSoundComponent::StaticClass();
 
 
 private:
@@ -48,7 +54,7 @@ private:
 	UPROPERTY()
 		UFoot* FootOnGround;
 	UPROPERTY()
-		USoundManager* SoundManager;
+		UBaseSoundComponent* SoundComputations;
 	UPROPERTY()
 		UBaseRenderTargetComponent* RenderTargetComputations;
 	UPROPERTY()
@@ -64,9 +70,9 @@ protected:
 	void Trace();
 	void setFootOnGround();
 	void drawOnRenderTarget();
-	void CreatePollutionFootPrint();
 	void initComponents();
 	void emittParticleEffect();
+	void playFootPrintSound();
 
 public:
 	// Called every frame

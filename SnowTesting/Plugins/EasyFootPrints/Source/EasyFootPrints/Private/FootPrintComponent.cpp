@@ -4,14 +4,9 @@
 #include "FootValues.h"
 #include "Foot.h"
 #include "GameFramework/Character.h"
-#include "Engine/DecalActor.h"
-#include "FootPrintDecal.h"
 #include "Engine/GameEngine.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Engine/World.h"
-#include "SoundManager.h"
-#include "Materials/MaterialInstanceDynamic.h"
 #include "Default Components/DefaultRenderTargetComponent.h"
 #include "Default Components/DefaultMovementAdjustmentComp.h"
 #include "Default Components/DefaultParticleSystemComponent.h"
@@ -23,8 +18,6 @@ UFootPrintComponent::UFootPrintComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	FootValues = FFootPrintValues();
-	SoundManager = NewObject<USoundManager>();
-
 }
 
 
@@ -33,9 +26,9 @@ void UFootPrintComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-		if (!Player) {
-			Player = GetWorld()->GetFirstPlayerController()->GetCharacter();
-		}
+	if (!Player) {
+		Player = GetWorld()->GetFirstPlayerController()->GetCharacter();
+	}
 
 	initComponents();
 	initFeet();
@@ -46,6 +39,7 @@ void UFootPrintComponent::initComponents()
 	RenderTargetComputations = NewObject<UBaseRenderTargetComponent>(this, RenderTargetComponent);
 	MovementComputations = NewObject<UBaseMovementAdjustmentComponent>(this, AdjMovementComponent);
 	ParticleSystem = NewObject<UBaseParticleSystemComponent>(this, ParticleSystemComponent);
+	SoundComputations = NewObject<UBaseSoundComponent>(this, SoundComponent);
 	MovementComputations->initComponent(this);
 }
 
@@ -77,7 +71,7 @@ void UFootPrintComponent::OnFootDown()
 		FootOnGround->IncreaseFootPollution();
 		MovementComputations->adjustMovement();
 		emittParticleEffect();
-		SoundManager->PlayFootprintSound(FootOnGround, this);
+		playFootPrintSound();
 	}
 
 	else
@@ -86,9 +80,11 @@ void UFootPrintComponent::OnFootDown()
 
 		if (FootOnGround->HasPollution())
 		{
-			CreatePollutionFootPrint();
+
+			FootOnGround->createPollutionFootPrint(FootPrintMaterial, GetWorld());
 			emittParticleEffect();
-			SoundManager->PlayFootprintSoundWithPollution(FootOnGround, this);
+			//SoundManager->PlayFootprintSoundWithPollution(FootOnGround, this);
+
 		}
 	}
 
@@ -131,6 +127,7 @@ void UFootPrintComponent::initFeet()
 		{
 			UFoot* foot = NewObject<UFoot>();
 			foot->setBoneName(name);
+			foot->initPollutionComponent(PollutionComponent);
 			FootValues.TrackedFeet.Add(foot);
 		}
 	}
@@ -177,26 +174,6 @@ void UFootPrintComponent::setFootOnGround()
 	FootOnGround->updateHitMaterial();
 }
 
-void UFootPrintComponent::CreatePollutionFootPrint()
-{
-	if (!GetWorld())
-	{
-		return;
-	}
-	ADecalActor* Adecal = GetWorld()->SpawnActor<ADecalActor>(AFootPrintDecal::StaticClass(), FootOnGround->getHitresult()->Location, FootOnGround->getRotation());
-	Adecal->SetDecalMaterial(FootPrintMaterial);
-	UMaterialInstanceDynamic* matinstance = Adecal->CreateDynamicMaterialInstance();
-	Adecal->SetDecalMaterial(matinstance);
-	FLinearColor ColorA = FLinearColor(0, 0, 0, 0);
-	FLinearColor LerpedColor = UKismetMathLibrary::LinearColorLerp(ColorA, FootOnGround->getBaseColor(), FootOnGround->getFootPollution());
-
-	matinstance->SetVectorParameterValue(FName("FootPrintColor"), LerpedColor);
-
-	// called after FootPrints have been created
-	FootOnGround->DecreaseFootPollution();
-
-}
-
 void UFootPrintComponent::emittParticleEffect()
 {
 	FVector Location = FootOnGround->getLocation();
@@ -204,24 +181,11 @@ void UFootPrintComponent::emittParticleEffect()
 	ParticleSystem->spawnParticleEmitter(Location, height, FootOnGround->getParticleEffect());
 }
 
-/*
-void UFootPrintComponent::EmittingParticleEffect(FVector Location) {
-	float tessellationHeight = FootOnGround->getTessellationHeight();
-	FVector FPPLocation = FVector(Location.X, Location.Y, Location.Z + tessellationHeight);
-
-	UMaterialInterface* Material = FootOnGround->getHitMaterial();
-	UPhysMaterial_EasyFootPrints* PhysMat = Cast<UPhysMaterial_EasyFootPrints>(Material->GetPhysicalMaterial());
-	CurrentFootprintParticleSystem = PhysMat->ParticleSystem;
-
-
-	if (CurrentFootprintParticleSystem != nullptr) {
-		UGameplayStatics::SpawnEmitterAtLocation(this, CurrentFootprintParticleSystem, FPPLocation);
-	}
+void UFootPrintComponent::playFootPrintSound()
+{
+	FVector Location = FootOnGround->getLocation();
+	USoundBase* Sound = FootOnGround->getFootPrintSound();
+	SoundComputations->playFootPrintSound(Location, Sound);
 }
 
-void UFootPrintComponent::EmittingParticleEffectWithPollution(FVector Location) {
-	if (CurrentFootprintParticleSystem != nullptr) {
-		UGameplayStatics::SpawnEmitterAtLocation(this, CurrentFootprintParticleSystem, Location);
-	}
-}
-*/
+

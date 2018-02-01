@@ -9,6 +9,8 @@
 #include "Engine/EngineTypes.h"
 #include "Materials/MaterialInterface.h"
 #include "PhysMaterial_EasyFootPrints.h"
+#include "Base Abstract Components/BasePollutionComponent.h"
+#include "Default Components/DefaultPollutionComponent.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 
 
@@ -19,60 +21,19 @@ void UFoot::setRotation(FFootPrintValues values)
 	Rotation = (floorRot * offsetRot).Rotator();
 }
 
+void UFoot::initPollutionComponent(TSubclassOf<UBasePollutionComponent> PollutionComp)
+{
+	PollutionComponent = NewObject<UBasePollutionComponent>(this, PollutionComp);
+}
+
 void UFoot::IncreaseFootPollution()
 {
-	if (!HitMaterial) {
-		return;
-	}
-
-	if (GetBaseColour() != CurrentMaterial) {
-		CurrentMaterial = GetBaseColour();
-		CurrentPollutionScale = GetPollutionScale();
-	}
-
-	AddPollution();
-
-
+	PollutionComponent->increasePollution(PhysMat);
 }
 
-void UFoot::DecreaseFootPollution()
+void UFoot::createPollutionFootPrint(UMaterialInterface * Material, UWorld* world)
 {
-	float Subtractor = 1 - FMath::Exp(-CurrentPollutionScale / 5);
-	FootPollution = FMath::Clamp<float>(FootPollution - Subtractor, 0.0f, 1.0f);
-
-	if (FootPollution <= 0.0f)
-	{
-		CurrentPollutionScale = 0.0f;
-		CurrentMaterial = FLinearColor(0, 0, 0, 0);
-	}
-}
-
-FLinearColor UFoot::GetBaseColour()
-{
-	FLinearColor BaseColor;
-
-	if (HitMaterial->GetVectorParameterValue(FName("BaseTexture"), BaseColor)) {
-		return BaseColor;
-	}
-
-	return FLinearColor(0, 0, 0);
-}
-
-float UFoot::GetPollutionScale()
-{
-	float PollutionScale = 0;
-
-	if (HitMaterial->GetScalarParameterValue(FName("PollutionScale"), PollutionScale)) {
-		return PollutionScale;
-	}
-	GEngine->AddOnScreenDebugMessage(1, 1, FColor::Green, FString("PollutionScale = ") + FString::SanitizeFloat(PollutionScale));
-	return 0.0f;
-}
-
-void UFoot::AddPollution()
-{
-	float PollutionScale = GetPollutionScale();
-	FootPollution = FMath::Clamp<float>((1 - FMath::Exp(-PollutionScale / 5) + FootPollution), 0.0f, 1.0f);
+	PollutionComponent->createPollutionFootPrint(Location, Rotation, Material,world);
 }
 
 float UFoot::getDepth()
@@ -150,4 +111,9 @@ UParticleSystem * UFoot::getParticleEffect()
 {
 
 	return PhysMat!= nullptr ? PhysMat->ParticleSystem : nullptr;
+}
+
+USoundBase * UFoot::getFootPrintSound()
+{
+	return PhysMat!=nullptr ? PhysMat->FootstepSound : nullptr;
 }

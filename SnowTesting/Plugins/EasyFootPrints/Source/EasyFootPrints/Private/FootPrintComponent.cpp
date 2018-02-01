@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "FootPrintComponent.h"
-#include "FootValues.h"
 #include "Foot.h"
 #include "GameFramework/Character.h"
 #include "Engine/GameEngine.h"
@@ -17,7 +16,6 @@
 UFootPrintComponent::UFootPrintComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	FootValues = FFootPrintValues();
 }
 
 
@@ -27,20 +25,22 @@ void UFootPrintComponent::BeginPlay()
 	Super::BeginPlay();
 
 	if (!Player) {
-		Player = GetWorld()->GetFirstPlayerController()->GetCharacter();
+		Player = Cast<ACharacter>(GetOwner());
 	}
 
 	initComponents();
 	initFeet();
 }
 
+/** creates components from the specified class; 
+	* if not specified, default components will be used */
 void UFootPrintComponent::initComponents()
 {
 	RenderTargetComputations = NewObject<UBaseRenderTargetComponent>(this, RenderTargetComponent);
 	MovementComputations = NewObject<UBaseMovementAdjustmentComponent>(this, AdjMovementComponent);
 	ParticleSystem = NewObject<UBaseParticleSystemComponent>(this, ParticleSystemComponent);
 	SoundComputations = NewObject<UBaseSoundComponent>(this, SoundComponent);
-	MovementComputations->initComponent(this);
+	MovementComputations->initComponent(Cast<UCharacterMovementComponent>(Player->GetMovementComponent()));
 }
 
 
@@ -54,11 +54,12 @@ void UFootPrintComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 }
 
 
-/// <summary> Called when a foot touches the ground </summary> 
+/**	This represents the main loop of the plugin
+	* it will be called whenever a foot touches the ground */
 void UFootPrintComponent::OnFootDown()
 {
 	if (!Player) {
-		Player = GetWorld()->GetFirstPlayerController()->GetCharacter();
+		Player = Cast<ACharacter>(GetOwner());
 	}
 
 	LoadFootPositions();
@@ -69,7 +70,7 @@ void UFootPrintComponent::OnFootDown()
 	{
 		drawOnRenderTarget();
 		FootOnGround->IncreaseFootPollution();
-		MovementComputations->adjustMovement();
+		adjustMovement();
 		emittParticleEffect();
 		playFootPrintSound();
 	}
@@ -81,7 +82,7 @@ void UFootPrintComponent::OnFootDown()
 		if (FootOnGround->HasPollution())
 		{
 
-			FootOnGround->createPollutionFootPrint(FootPrintMaterial, GetWorld());
+			FootOnGround->createPollutionFootPrint(PollutionFootPrintMaterial, GetWorld());
 			emittParticleEffect();
 			//SoundManager->PlayFootprintSoundWithPollution(FootOnGround, this);
 
@@ -90,28 +91,23 @@ void UFootPrintComponent::OnFootDown()
 
 }
 
+/**	Calls the drawOnRenderTarget method from the RenderTargetComponent with the specified parameters */
 void UFootPrintComponent::drawOnRenderTarget()
 {
 	FRenderTargetValues* RenderTargetValues = FootOnGround->getRenderTargetValues();
-	RenderTargetComputations->drawOnRenderTarget(M_Spot, RenderTargetValues);
+	RenderTargetComputations->drawOnRenderTarget(MaterialToDrawOnRenderTarget, RenderTargetValues);
 }
 
-
-/// <summary>  Calls the initFeet() method and sets location of every foot </summary> 
+/** Sets location of every foot based on the bone position	*/ 
 void UFootPrintComponent::LoadFootPositions()
 {
-
-	for (UFoot* f : FootValues.TrackedFeet)
+	for (UFoot* f : TrackedFeet)
 	{
 		f->setLocation(Player->GetMesh()->GetBoneLocation(f->getBoneName()));
 	}
-
-	FootValues.setForwardVector(Player->GetActorForwardVector());
-
 }
 
-
-/// <summary> creates an Array of Feet with the specified Bones </summary>
+/** Creates an array of UFoot for every foot specified in the Array BoneNames  */
 void UFootPrintComponent::initFeet()
 {
 	if (BoneNames.Num() <= 0) {
@@ -119,61 +115,57 @@ void UFootPrintComponent::initFeet()
 			return;
 	}
 
-	if (FootValues.TrackedFeet.Num() != BoneNames.Num())
+	if (TrackedFeet.Num() != BoneNames.Num())
 	{
-		FootValues.TrackedFeet.Empty();
+		TrackedFeet.Empty();
 
 		for (FName name : BoneNames)
 		{
 			UFoot* foot = NewObject<UFoot>();
 			foot->setBoneName(name);
 			foot->initPollutionComponent(PollutionComponent);
-			FootValues.TrackedFeet.Add(foot);
+			TrackedFeet.Add(foot);
 		}
 	}
 }
 
-
-/// <summary> Performs a Linetrace for every foot and set its rotation </summary>
+/**  Performs a LineTraceSingleyByChannel for every foot in the UFoot Array*/
 void UFootPrintComponent::Trace()
 {
 	FCollisionQueryParams TraceParams = FCollisionQueryParams(FName("FootPrint Trace"), true, Player);
 	TraceParams.bReturnPhysicalMaterial = true;
 
-	for (UFoot* f : FootValues.TrackedFeet)
+	for (UFoot* f : TrackedFeet)
 	{
 
 		FVector end = FVector(f->getLocation().X, f->getLocation().Y, f->getLocation().Z - 50.0f);
 		//perform LineTrace
 		GetWorld()->LineTraceSingleByChannel(*f->getHitresult(), f->getLocation(), end, ECollisionChannel::ECC_Visibility, TraceParams);
 		//set Rotation
-		f->setRotation(FootValues);
+		f->setRotation(Player->GetActorForwardVector());
 	}
 }
 
-
-
-/*
-*	Calculates the foot that is touching/closest to the ground
-*	To-Do: Implement Lambda for Sorting
-*/
+/** Calculates the foot that is closest to the ground and set it to FootOnGround
+	* To-Do: Implement Lambda for Sorting */
 void UFootPrintComponent::setFootOnGround()
 {
 	//FootValues.TrackedFeet.Sort([](UFoot* f1, UFoot* f2) { return f1->getLocation().Z > f2->getLocation().Z; });
 	int32 temp = MAX_int32;
 	int32 key = 0;
 
-	for (int32 i = 0; i < FootValues.TrackedFeet.Num(); i++)
+	for (int32 i = 0; i < TrackedFeet.Num(); i++)
 	{
-		if (FootValues.TrackedFeet[i]->getLocation().Z <= temp) {
-			temp = FootValues.TrackedFeet[i]->getLocation().Z;
+		if (TrackedFeet[i]->getLocation().Z <= temp) {
+			temp = TrackedFeet[i]->getLocation().Z;
 			key = i;
 		}
 	}
-	FootOnGround = FootValues.TrackedFeet[key];
+	FootOnGround = TrackedFeet[key];
 	FootOnGround->updateHitMaterial();
 }
 
+/** Calls the spawnParticleEmitter method of the ParticleComponent with the specified parameters */
 void UFootPrintComponent::emittParticleEffect()
 {
 	FVector Location = FootOnGround->getLocation();
@@ -181,11 +173,19 @@ void UFootPrintComponent::emittParticleEffect()
 	ParticleSystem->spawnParticleEmitter(Location, height, FootOnGround->getParticleEffect());
 }
 
+/** Calls the playFootPrindSound method from the SoundComponent with the specified parameters*/
 void UFootPrintComponent::playFootPrintSound()
 {
 	FVector Location = FootOnGround->getLocation();
 	USoundBase* Sound = FootOnGround->getFootPrintSound();
 	SoundComputations->playFootPrintSound(Location, Sound);
+}
+
+/** Calls the adjustMovement method of the MovementComponent after getting depth from FootOnGround */
+void UFootPrintComponent::adjustMovement()
+{
+	float depth = FootOnGround->getDepth();
+	MovementComputations->adjustMovement(depth);
 }
 
 

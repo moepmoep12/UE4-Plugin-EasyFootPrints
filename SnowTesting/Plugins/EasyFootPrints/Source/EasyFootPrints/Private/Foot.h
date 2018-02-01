@@ -11,7 +11,6 @@
  * 
  */
 class UTextureRenderTarget2D;
-struct FFootPrintValues;
 class UPhysMaterial_EasyFootPrints;
 
 UCLASS()
@@ -20,15 +19,6 @@ class UFoot : public UObject
 	GENERATED_BODY()
 
 private:
-	UPROPERTY()
-		UPhysMaterial_EasyFootPrints* PhysMat;
-
-	UPROPERTY()
-		FRenderTargetValues RenderTargetValues = FRenderTargetValues();
-
-	UPROPERTY()
-		UTextureRenderTarget2D* RenderTargetOfHitMaterial = nullptr;
-
 	UPROPERTY()
 		FVector Location;
 
@@ -40,6 +30,15 @@ private:
 
 	UPROPERTY()
 		FHitResult Hitresult = FHitResult(ForceInit);
+
+	UPROPERTY()
+		UPhysMaterial_EasyFootPrints* PhysMat;
+
+	UPROPERTY()
+		FRenderTargetValues RenderTargetValues = FRenderTargetValues();
+
+	UPROPERTY()
+		UTextureRenderTarget2D* RenderTargetOfHitMaterial = nullptr;
 
 	UPROPERTY()
 		UBasePollutionComponent* PollutionComponent;
@@ -63,7 +62,7 @@ public:
 	USoundBase* getFootPrintSound();
 
 	void setLocation(FVector loc) { Location = loc; }
-	void setRotation(FFootPrintValues values);
+	void setRotation(FVector ForwardVector);
 	void setBoneName(FName name) { Name = name; }
 	
 	void IncreaseFootPollution();

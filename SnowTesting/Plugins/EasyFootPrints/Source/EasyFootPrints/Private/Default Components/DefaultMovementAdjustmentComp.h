@@ -12,17 +12,20 @@ UCLASS()
 class UDefaultMovementAdjustmentComp : public UBaseMovementAdjustmentComponent
 {
 	GENERATED_BODY()
+
 private:
 	UPROPERTY()
-		UFootPrintComponent* FootPrintComponent;
-	UPROPERTY()
 		float OriginaMaxWalkingSpeed;
+
 	UPROPERTY()
 		float CurrentMaxWalkSpeed;
+
 	UPROPERTY()
 		float OriginalJumpVelocity;
+
 	UPROPERTY()
 		float CurrentJumpVelocity;
+
 	UPROPERTY()
 		UCharacterMovementComponent* MovementComponent;
 
@@ -33,8 +36,8 @@ protected:
 
 
 public:
-	virtual void initComponent(UFootPrintComponent* FPComp) override;
-	virtual void adjustMovement() override;
+	virtual void initComponent(UCharacterMovementComponent* MovementComponent) override;
+	virtual void adjustMovement(float depth) override;
 	virtual void resetMovement() override;
 	
 };

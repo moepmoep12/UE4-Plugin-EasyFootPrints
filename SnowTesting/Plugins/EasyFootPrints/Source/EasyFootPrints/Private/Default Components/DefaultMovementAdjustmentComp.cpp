@@ -5,24 +5,23 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "FootPrintComponent.h"
 
-void UDefaultMovementAdjustmentComp::initComponent(UFootPrintComponent * FPComp)
+void UDefaultMovementAdjustmentComp::initComponent(UCharacterMovementComponent* MovementComponent)
 {
-		FootPrintComponent = FPComp;
-		saveOriginalMovementValues();
+	this->MovementComponent = MovementComponent;
+	saveOriginalMovementValues();
 }
 
 
 void UDefaultMovementAdjustmentComp::saveOriginalMovementValues()
 {
-	MovementComponent = Cast<UCharacterMovementComponent>(FootPrintComponent->getPlayer()->GetMovementComponent());
+	//MovementComponent = Cast<UCharacterMovementComponent>(FootPrintComponent->getPlayer()->GetMovementComponent());
 	OriginaMaxWalkingSpeed = MovementComponent->MaxWalkSpeed;
 	OriginalJumpVelocity = MovementComponent->JumpZVelocity;
 }
 
 
-void UDefaultMovementAdjustmentComp::adjustMovement()
+void UDefaultMovementAdjustmentComp::adjustMovement(float depth)
 {
-	float depth = FootPrintComponent->getFootOnGround()->getDepth();
 	adjustMaxWalkSpeed(depth);
 	adjustJumpVelocity(depth);
 }
@@ -32,7 +31,7 @@ void UDefaultMovementAdjustmentComp::adjustMaxWalkSpeed(float depth)
 	float adjustedWalkSpeed = OriginaMaxWalkingSpeed * (1 / depth);
 
 	if (adjustedWalkSpeed != CurrentMaxWalkSpeed) {
-		Cast<UCharacterMovementComponent>(FootPrintComponent->getPlayer()->GetMovementComponent())->MaxWalkSpeed = adjustedWalkSpeed;
+		MovementComponent->MaxWalkSpeed = adjustedWalkSpeed;
 		CurrentMaxWalkSpeed = adjustedWalkSpeed;
 	}
 }
@@ -42,7 +41,7 @@ void UDefaultMovementAdjustmentComp::adjustJumpVelocity(float depth)
 	float adjustedJumpVelocity = OriginalJumpVelocity - OriginalJumpVelocity * (1 / depth);
 
 	if (adjustedJumpVelocity != CurrentJumpVelocity) {
-		Cast<UCharacterMovementComponent>(FootPrintComponent->getPlayer()->GetMovementComponent())->JumpZVelocity = adjustedJumpVelocity;
+		MovementComponent->JumpZVelocity = adjustedJumpVelocity;
 		CurrentJumpVelocity = adjustedJumpVelocity;
 	}
 }

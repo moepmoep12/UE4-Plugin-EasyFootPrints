@@ -21,6 +21,9 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override {};
 
+	/* Plays a sound at a given location
+		@Location: the location to play the sound
+		@Sound: the sound that will be played	*/
 	virtual void playFootPrintSound(FVector Location, USoundBase* Sound) {};
 
 		

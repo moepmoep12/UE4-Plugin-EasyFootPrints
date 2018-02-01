@@ -23,6 +23,11 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override {};
+
+	/* draws the material onto the render target 
+		@MaterialToDraw: the material that is used for drawing
+		@RenderTargetValues: a struct with basic information such as Location and the RenderTarget	
+	*/
 	virtual void drawOnRenderTarget(UMaterialInterface* MaterialToDraw, FRenderTargetValues* RenderTargetValues) {};
 	
 		

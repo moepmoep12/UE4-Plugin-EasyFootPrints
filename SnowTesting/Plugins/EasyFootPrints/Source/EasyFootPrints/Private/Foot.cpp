@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Foot.h"
-#include "FootValues.h"
 #include "Engine/GameEngine.h"
 #include "Components/PrimitiveComponent.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -14,9 +13,9 @@
 #include "PhysicalMaterials/PhysicalMaterial.h"
 
 
-void UFoot::setRotation(FFootPrintValues values)
+void UFoot::setRotation(FVector ForwardVector)
 {
-	FQuat floorRot = FRotationMatrix::MakeFromZX(Hitresult.Normal, values.getForwardVector()).ToQuat();
+	FQuat floorRot = FRotationMatrix::MakeFromZX(Hitresult.Normal, ForwardVector).ToQuat();
 	FQuat offsetRot(FRotator(0.0f, 90.0f, 0.0f));
 	Rotation = (floorRot * offsetRot).Rotator();
 }

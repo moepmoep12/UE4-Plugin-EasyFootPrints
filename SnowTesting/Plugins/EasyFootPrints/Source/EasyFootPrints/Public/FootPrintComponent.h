@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Runtime/Engine/Classes/Sound/SoundCue.h"
 #include "Components/ActorComponent.h"
-#include "FootValues.h"
 #include "Default Components/DefaultMovementAdjustmentComp.h"
 #include "Default Components/DefaultRenderTargetComponent.h"
 #include "Default Components/DefaultParticleSystemComponent.h"
@@ -23,36 +22,52 @@ class EASYFOOTPRINTS_API UFootPrintComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	// The array represents all bones that should be tracked by this plugin
 	UPROPERTY(BluePrintReadWrite, EditAnyWhere)
 		TArray<FName> BoneNames;
+
+	// the material that will be used when creating pollution footprints
 	UPROPERTY(BluePrintReadWrite, EditAnyWhere)
-		UMaterialInterface* FootPrintMaterial;
+		UMaterialInterface* PollutionFootPrintMaterial;
+
+	// the material that will be used when drawing on render target
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere)
-		UMaterialInterface* M_Spot;
+		UMaterialInterface* MaterialToDrawOnRenderTarget;
 
 	/*
-	/	this represents the default components the plugin will be using
+	/	the classes for the components are defined here
 	/	custom components can be set via blueprint
 	*/
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = Components)
 		TSubclassOf<class UBaseRenderTargetComponent> RenderTargetComponent = UDefaultRenderTargetComponent::StaticClass();
+
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = Components)
 		TSubclassOf<class UBaseMovementAdjustmentComponent> AdjMovementComponent = UDefaultMovementAdjustmentComp::StaticClass();
+
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = Components)
 		TSubclassOf<class UBaseParticleSystemComponent> ParticleSystemComponent = UDefaultParticleSystemComponent::StaticClass();
+
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = Components)
 		TSubclassOf<class UBasePollutionComponent> PollutionComponent = UDefaultPollutionComponent::StaticClass();
+
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = Components)
 		TSubclassOf<class UBaseSoundComponent> SoundComponent = UDefaultSoundComponent::StaticClass();
 
 
 private:
+	// the owner of this component
 	UPROPERTY()
 		ACharacter* Player;
-	UPROPERTY()
-		FFootPrintValues FootValues;
+
+	// this represents the foot that is closest to the ground
 	UPROPERTY()
 		UFoot* FootOnGround;
+
+	// Array of UFoot that represents all feet that will be tracked
+	UPROPERTY()
+		TArray<UFoot*> TrackedFeet;
+
+	/** the following components are used for several calculations and will be created by the corresponding component class */
 	UPROPERTY()
 		UBaseSoundComponent* SoundComputations;
 	UPROPERTY()
@@ -73,6 +88,7 @@ protected:
 	void initComponents();
 	void emittParticleEffect();
 	void playFootPrintSound();
+	void adjustMovement();
 
 public:
 	// Called every frame

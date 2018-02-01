@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "BaseMovementAdjustmentComponent.generated.h"
 
 // Forward Declaration
@@ -25,8 +26,14 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override {};
-	virtual void adjustMovement() {};
+
+	/* adjusts the character movement based on the depth of the material*/
+	virtual void adjustMovement(float depth) {};
+
+	/* restores the values of the movement component to its original*/
 	virtual void resetMovement() {};
-	virtual void initComponent(UFootPrintComponent* FPComp) {};
+
+	/** Should be used to create a pointer to the character movement component that will be changed by this component and also save the orignal values*/
+	virtual void initComponent(UCharacterMovementComponent* MovementComponent) {};
 	
 };

@@ -9,8 +9,8 @@ void UDefaultParticleSystemComponent::spawnParticleEmitter(FVector Location, flo
 		return;
 	}
 
-	FVector SpawnLocation = FVector(Location.X, Location.Y, Location.Z + TessellationHeight);
-	UGameplayStatics::SpawnEmitterAtLocation(this, ParticleEffect, SpawnLocation);
+	//FVector SpawnLocation = FVector(Location.X, Location.Y, Location.Z + 0.5* TessellationHeight);
+	UGameplayStatics::SpawnEmitterAtLocation(this, ParticleEffect, Location);
 }
 
 

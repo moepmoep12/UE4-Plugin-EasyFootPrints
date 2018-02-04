@@ -2,6 +2,8 @@
 
 #include "DefaultParticleSystemComponent.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
+
 
 void UDefaultParticleSystemComponent::spawnParticleEmitter(FVector Location, float TessellationHeight , UParticleSystem* ParticleEffect) {
 
@@ -13,4 +15,12 @@ void UDefaultParticleSystemComponent::spawnParticleEmitter(FVector Location, flo
 	UGameplayStatics::SpawnEmitterAtLocation(this, ParticleEffect, Location);
 }
 
+void UDefaultParticleSystemComponent::spawnPollutionParticleEffect(FVector Location, float Pollution, UParticleSystem * ParticleEffect)
+{
+	if (!ParticleEffect) {
+		return;
+	}
+	UGameplayStatics::SpawnEmitterAtLocation(this, ParticleEffect, Location);
+
+}
 

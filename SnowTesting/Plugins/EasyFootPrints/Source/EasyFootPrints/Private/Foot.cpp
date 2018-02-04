@@ -112,6 +112,11 @@ UParticleSystem * UFoot::getParticleEffect()
 	return PhysMat!= nullptr ? PhysMat->ParticleSystem : nullptr;
 }
 
+UParticleSystem * UFoot::getPollutionParticleEffect()
+{
+	return PhysMat != nullptr ? PhysMat->PollitionParticleSystem : nullptr;
+}
+
 USoundBase * UFoot::getFootPrintSound()
 {
 	return PhysMat!=nullptr ? PhysMat->FootstepSound : nullptr;

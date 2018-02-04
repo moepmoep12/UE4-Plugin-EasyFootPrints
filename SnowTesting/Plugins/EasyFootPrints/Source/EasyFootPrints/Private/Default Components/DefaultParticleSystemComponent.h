@@ -17,5 +17,7 @@ class UDefaultParticleSystemComponent : public UBaseParticleSystemComponent
 	
 public:
 	virtual void spawnParticleEmitter(FVector Location, float TessellationHeight , UParticleSystem* ParticleEffect) override;
+
+	void spawnPollutionParticleEffect(FVector Location, float Pollution, UParticleSystem* ParticleEffect) override;
 	
 };

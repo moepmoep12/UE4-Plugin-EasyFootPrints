@@ -59,6 +59,7 @@ public:
 	float getTessellationHeight();
 	FRenderTargetValues* getRenderTargetValues();
 	UParticleSystem* getParticleEffect();
+	UParticleSystem* getPollutionParticleEffect();
 	USoundBase* getFootPrintSound();
 
 	void setLocation(FVector loc) { Location = loc; }

@@ -26,6 +26,8 @@ public:
 		*@TessellationHeight: the tessellationheight of the material, can be used to adjust Z-position
 		*@ParticleEffect: the particle effect that belongs to the material */
 	virtual void spawnParticleEmitter(FVector Location, float TessellationHeight , UParticleSystem* ParticleEffect) {};
+
+	virtual void spawnPollutionParticleEffect(FVector Location, float Pollution, UParticleSystem* ParticleEffect) {};
 		
 	
 };

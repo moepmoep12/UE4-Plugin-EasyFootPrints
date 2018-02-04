@@ -20,6 +20,9 @@ public:
 		UParticleSystem* ParticleSystem;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EasyFootPrints)
+		UParticleSystem* PollitionParticleSystem;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EasyFootPrints)
 		USoundCue* FootstepSound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EasyFootPrints)

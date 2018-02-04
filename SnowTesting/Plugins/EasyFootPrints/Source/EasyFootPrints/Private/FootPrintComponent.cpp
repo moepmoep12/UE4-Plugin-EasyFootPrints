@@ -83,7 +83,7 @@ void UFootPrintComponent::OnFootDown()
 		{
 
 			FootOnGround->createPollutionFootPrint(PollutionFootPrintMaterial, GetWorld());
-			emittParticleEffect();
+			emittPolutionParticleEffect();
 			//SoundManager->PlayFootprintSoundWithPollution(FootOnGround, this);
 
 		}
@@ -161,6 +161,7 @@ void UFootPrintComponent::setFootOnGround()
 			key = i;
 		}
 	}
+	
 	FootOnGround = TrackedFeet[key];
 	FootOnGround->updateHitMaterial();
 }
@@ -171,6 +172,12 @@ void UFootPrintComponent::emittParticleEffect()
 	FVector Location = FootOnGround->getLocation();
 	float height = FootOnGround->getTessellationHeight();
 	ParticleSystem->spawnParticleEmitter(Location, height, FootOnGround->getParticleEffect());
+}
+
+void UFootPrintComponent::emittPolutionParticleEffect()
+{
+	FVector Location = FootOnGround->getLocation();
+	ParticleSystem->spawnPollutionParticleEffect(Location, 0, FootOnGround->getPollutionParticleEffect());
 }
 
 /** Calls the playFootPrindSound method from the SoundComponent with the specified parameters*/

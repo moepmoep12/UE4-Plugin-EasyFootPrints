@@ -89,6 +89,7 @@ protected:
 	void emittParticleEffect();
 	void playFootPrintSound();
 	void adjustMovement();
+	void emittPolutionParticleEffect();
 
 public:
 	// Called every frame

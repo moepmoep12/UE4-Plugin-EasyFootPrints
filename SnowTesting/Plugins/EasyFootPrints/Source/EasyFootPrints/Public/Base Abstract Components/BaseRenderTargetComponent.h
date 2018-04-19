@@ -10,7 +10,7 @@
 class UFootPrintComponent;
 
 
-UCLASS( ClassGroup=(EasyFootPrints), abstract )
+UCLASS( ClassGroup=(EasyFootPrints),  meta = (IsBlueprintBase = "true") , abstract)
 class EASYFOOTPRINTS_API UBaseRenderTargetComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -28,8 +28,12 @@ public:
 		@MaterialToDraw: the material that is used for drawing
 		@RenderTargetValues: a struct with basic information such as Location and the RenderTarget	
 	*/
-	virtual void drawOnRenderTarget(UMaterialInterface* MaterialToDraw, FRenderTargetValues* RenderTargetValues) {};
+	UFUNCTION(BlueprintNativeEvent, meta = (DisplayName = "Draw on RenderTarget", Keywords = "render target footprint plugin"), Category = "EasyFootPrints")
+		void drawOnRenderTarget(UMaterialInterface * FootPrintShape, struct FRenderTargetValues& RenderTargetValues, FTransform ShapeTransform) ;
 	
+	virtual void drawOnRenderTarget_Implementation(UMaterialInterface * FootPrintShape, struct FRenderTargetValues& RenderTargetValues, FTransform ShapeTransform) {};
+
+
 		
 	
 };

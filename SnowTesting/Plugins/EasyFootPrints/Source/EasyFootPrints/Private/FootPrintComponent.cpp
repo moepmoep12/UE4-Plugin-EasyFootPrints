@@ -81,11 +81,8 @@ void UFootPrintComponent::OnFootDown()
 
 		if (FootOnGround->HasPollution())
 		{
-
 			FootOnGround->createPollutionFootPrint(PollutionFootPrintMaterial, GetWorld());
 			emittPolutionParticleEffect();
-			//SoundManager->PlayFootprintSoundWithPollution(FootOnGround, this);
-
 		}
 	}
 
@@ -94,8 +91,11 @@ void UFootPrintComponent::OnFootDown()
 /**	Calls the drawOnRenderTarget method from the RenderTargetComponent with the specified parameters */
 void UFootPrintComponent::drawOnRenderTarget()
 {
+	if (!RenderTargetComputations) {
+		GEngine->AddOnScreenDebugMessage(0, 5, FColor::Black, FString("null"));
+	}
 	FRenderTargetValues* RenderTargetValues = FootOnGround->getRenderTargetValues();
-	RenderTargetComputations->drawOnRenderTarget(MaterialToDrawOnRenderTarget, RenderTargetValues);
+	RenderTargetComputations->drawOnRenderTarget_Implementation(FootPrintShapeMaterial, *RenderTargetValues, FootPrintShapeTransform );
 }
 
 /** Sets location of every foot based on the bone position	*/ 

@@ -22,35 +22,39 @@ class EASYFOOTPRINTS_API UFootPrintComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	// The array represents all bones that should be tracked by this plugin
+	// The array represents all bones that should be tracked by this plugin, insert bone names here
 	UPROPERTY(BluePrintReadWrite, EditAnyWhere)
 		TArray<FName> BoneNames;
 
-	// the material that will be used when creating pollution footprints
+	// The material that will be used when creating pollution footprints
 	UPROPERTY(BluePrintReadWrite, EditAnyWhere)
 		UMaterialInterface* PollutionFootPrintMaterial;
 
-	// the material that will be used when drawing on render target
-	UPROPERTY(BlueprintReadWrite, EditAnyWhere)
-		UMaterialInterface* MaterialToDrawOnRenderTarget;
+	// The material which defines the shape that will deform the landscape
+	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = FootPrintShape)
+		UMaterialInterface* FootPrintShapeMaterial;
+
+	// A transform that affects the shape of the footprints
+	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = FootPrintShape)
+		FTransform FootPrintShapeTransform;
 
 	/*
 	/	the classes for the components are defined here
 	/	custom components can be set via blueprint
 	*/
-	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = Components)
+	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = FootPrintComponents)
 		TSubclassOf<class UBaseRenderTargetComponent> RenderTargetComponent = UDefaultRenderTargetComponent::StaticClass();
 
-	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = Components)
+	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = FootPrintComponents)
 		TSubclassOf<class UBaseMovementAdjustmentComponent> AdjMovementComponent = UDefaultMovementAdjustmentComp::StaticClass();
 
-	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = Components)
+	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = FootPrintComponents)
 		TSubclassOf<class UBaseParticleSystemComponent> ParticleSystemComponent = UDefaultParticleSystemComponent::StaticClass();
 
-	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = Components)
+	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = FootPrintComponents)
 		TSubclassOf<class UBasePollutionComponent> PollutionComponent = UDefaultPollutionComponent::StaticClass();
 
-	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = Components)
+	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = FootPrintComponents)
 		TSubclassOf<class UBaseSoundComponent> SoundComponent = UDefaultSoundComponent::StaticClass();
 
 
@@ -67,7 +71,7 @@ private:
 	UPROPERTY()
 		TArray<UFoot*> TrackedFeet;
 
-	/** the following components are used for several calculations and will be created by the corresponding component class */
+	/** the following components are used for several calculations and will be created from the corresponding component class */
 	UPROPERTY()
 		UBaseSoundComponent* SoundComputations;
 	UPROPERTY()
@@ -97,7 +101,7 @@ public:
 	// Constructor
 	UFootPrintComponent();
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Create 2D Footprint", Keywords = "print plugin"), Category = "EasyFootPrints")
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Create FootPrints", Keywords = "print plugin"), Category = "EasyFootPrints")
 		void OnFootDown();
 	UFUNCTION()
 		UFoot* getFootOnGround() { return FootOnGround; };

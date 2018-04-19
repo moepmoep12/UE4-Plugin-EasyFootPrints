@@ -17,14 +17,21 @@ class UDefaultRenderTargetComponent : public UBaseRenderTargetComponent
 private:
 	UPROPERTY()
 		FRenderTargetValues RenderTargetValues;
+	UPROPERTY()
+		FTransform ShapeTransform;
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-	FVector2D ComputeRenderTargetScreenSize();
-	FVector2D ComputeScreenPositionOnRenderTarget();
+
+	/** Calculates the size of the footprint shape that is drawn onto the rendertarget
+	*	will be adjusted by scale set in ShapeTransform
+	*/
+	FVector2D CalculateFootShapeSize();
+	FVector2D CalculateScreenPosition();
+	FVector2D CalculatePositionOffset(FVector2D Position);
 	
 public:
-	 void drawOnRenderTarget(UMaterialInterface* MaterialToDraw, FRenderTargetValues* RenderTargetValues) override;
+	 void drawOnRenderTarget_Implementation(UMaterialInterface * FootPrintShape,struct FRenderTargetValues& RenderTargetValues, FTransform ShapeTransform) override;
 
 };

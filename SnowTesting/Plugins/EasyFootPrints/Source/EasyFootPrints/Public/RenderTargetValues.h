@@ -5,7 +5,7 @@
 
 class UTextureRenderTarget2D;
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FRenderTargetValues
 {
 	GENERATED_BODY()

@@ -32,7 +32,7 @@ void UFoot::IncreaseFootPollution()
 
 void UFoot::createPollutionFootPrint(UMaterialInterface * Material, UWorld* world)
 {
-	PollutionComponent->createPollutionFootPrint(Location, Rotation, Material,world);
+	PollutionComponent->createPollutionFootPrint(Location, Rotation, PollutionMaterial,world);
 }
 
 float UFoot::getDepth()

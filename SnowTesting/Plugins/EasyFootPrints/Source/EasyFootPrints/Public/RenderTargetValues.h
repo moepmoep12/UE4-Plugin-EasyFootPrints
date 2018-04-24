@@ -10,15 +10,19 @@ struct FRenderTargetValues
 {
 	GENERATED_BODY()
 
-		UPROPERTY()
+	// The location of the hit actor
+	UPROPERTY()
 		FVector2D ActorLocation;
 
+	// the x-y scale of the hit actor
 	UPROPERTY()
 		FVector2D ActorScale;
 
+	// the actor bounds of the hit actor
 	UPROPERTY()
 		FVector2D ActorBounds;
 
+	// the world location of the hit
 	UPROPERTY()
 		FVector2D HitLocation;
 

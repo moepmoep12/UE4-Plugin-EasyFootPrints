@@ -23,8 +23,13 @@ class EASYFOOTPRINTS_API UFootPrintComponent : public UActorComponent
 
 public:
 	// The array represents all bones that should be tracked by this plugin, insert bone names here
-	UPROPERTY(BluePrintReadWrite, EditAnyWhere)
+	UPROPERTY(BluePrintReadWrite, EditAnyWhere, Category= Bones)
 		TArray<FName> BoneNames;
+
+	// The name of the bone that is the centre of the skeleton
+	// This is used to determine if a foot is left/right
+	UPROPERTY(BluePrintReadWrite, EditAnyWhere, Category = Bones)
+		FName CentralBone = "pelvis";
 
 	// The material that will be used when creating pollution footprints
 	UPROPERTY(BluePrintReadWrite, EditAnyWhere)
@@ -71,6 +76,10 @@ private:
 	UPROPERTY()
 		TArray<UFoot*> TrackedFeet;
 
+	//
+	UPROPERTY()
+		FVector CentralBoneLocation;
+
 	/** the following components are used for several calculations and will be created from the corresponding component class */
 	UPROPERTY()
 		UBaseSoundComponent* SoundComputations;
@@ -86,6 +95,7 @@ protected:
 	virtual void BeginPlay() override;
 	void LoadFootPositions();
 	void initFeet();
+	void setFootMaterials();
 	void Trace();
 	void setFootOnGround();
 	void drawOnRenderTarget();

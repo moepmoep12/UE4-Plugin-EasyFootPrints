@@ -9,6 +9,7 @@
 #include "Default Components/DefaultRenderTargetComponent.h"
 #include "Default Components/DefaultMovementAdjustmentComp.h"
 #include "Default Components/DefaultParticleSystemComponent.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "PhysMaterial_EasyFootPrints.h"
 
 
@@ -30,6 +31,7 @@ void UFootPrintComponent::BeginPlay()
 
 	initComponents();
 	initFeet();
+	setFootMaterials();
 }
 
 /** creates components from the specified class; 
@@ -91,11 +93,8 @@ void UFootPrintComponent::OnFootDown()
 /**	Calls the drawOnRenderTarget method from the RenderTargetComponent with the specified parameters */
 void UFootPrintComponent::drawOnRenderTarget()
 {
-	if (!RenderTargetComputations) {
-		GEngine->AddOnScreenDebugMessage(0, 5, FColor::Black, FString("null"));
-	}
 	FRenderTargetValues* RenderTargetValues = FootOnGround->getRenderTargetValues();
-	RenderTargetComputations->drawOnRenderTarget_Implementation(FootPrintShapeMaterial, *RenderTargetValues, FootPrintShapeTransform );
+	RenderTargetComputations->drawOnRenderTarget_Implementation(FootOnGround->getFootPrintShape(), *RenderTargetValues, FootPrintShapeTransform );
 }
 
 /** Sets location of every foot based on the bone position	*/ 
@@ -114,7 +113,7 @@ void UFootPrintComponent::initFeet()
 		UE_LOG(LogTemp, Warning, TEXT("Bone Amount is <= 0"))
 			return;
 	}
-
+	
 	if (TrackedFeet.Num() != BoneNames.Num())
 	{
 		TrackedFeet.Empty();
@@ -125,6 +124,29 @@ void UFootPrintComponent::initFeet()
 			foot->setBoneName(name);
 			foot->initPollutionComponent(PollutionComponent);
 			TrackedFeet.Add(foot);
+		}
+	}
+}
+/** Determines for every foot if its right or left and sets its material accordingly
+	TO-DO : improve If-statement to be more accurate
+*/
+void UFootPrintComponent::setFootMaterials()
+{
+	UMaterialInstanceDynamic* FootPrintShape_Right = UMaterialInstanceDynamic::Create(FootPrintShapeMaterial, this);
+	UMaterialInstanceDynamic* FootPrintShape_Left = UMaterialInstanceDynamic::Create(FootPrintShapeMaterial, this);
+	UMaterialInstanceDynamic* PollutionMaterial_Right = UMaterialInstanceDynamic::Create(PollutionFootPrintMaterial, this);
+	UMaterialInstanceDynamic* PollutionMaterial_Left = UMaterialInstanceDynamic::Create(PollutionFootPrintMaterial, this);
+	FootPrintShape_Left->SetScalarParameterValue(FName("Mirror"), -1.0f);
+	PollutionMaterial_Left->SetScalarParameterValue(FName("Mirror"), -1.0f);
+
+	for (UFoot* f : TrackedFeet) {
+		if (Player->GetMesh()->GetBoneLocation(f->getBoneName()).X > Player->GetMesh()->GetBoneLocation(CentralBone).X) {
+			f->setFootPrintShape(FootPrintShape_Right);
+			f->setPollutionMaterial(PollutionMaterial_Right);
+		}
+		else {
+			f->setFootPrintShape(FootPrintShape_Left);
+			f->setPollutionMaterial(PollutionMaterial_Left);
 		}
 	}
 }

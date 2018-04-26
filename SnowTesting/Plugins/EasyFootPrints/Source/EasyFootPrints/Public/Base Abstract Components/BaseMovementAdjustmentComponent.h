@@ -14,12 +14,12 @@ class UFootPrintComponent;
 /** This is an abstract base class for a MovementAdjustment Component.
 *   When a player walks through a material with tessellation the component is responsible for adjusting the movement
 */
-UCLASS( ClassGroup=(EasyFootPrints), abstract )
+UCLASS(ClassGroup = (EasyFootPrints), abstract)
 class EASYFOOTPRINTS_API UBaseMovementAdjustmentComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	// Sets default values for this component's properties
 	//UBaseMovementAdjustmentComponent();
 
@@ -27,7 +27,7 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override {};
 
-public:	
+public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override {};
 
@@ -39,5 +39,5 @@ public:
 
 	/** Should be used to create a pointer to the character movement component that will be changed by this component and also save the orignal values*/
 	virtual void initComponent(UCharacterMovementComponent* MovementComponent) {};
-	
+
 };

@@ -7,15 +7,15 @@
 #include "DefaultPollutionComponent.generated.h"
 
 /**
- *  The default implementation for the BasePollutionComponent
- */
+*  The default implementation for the BasePollutionComponent
+*/
 class UMaterialInterface;
 
 UCLASS()
 class UDefaultPollutionComponent : public UBasePollutionComponent
 {
 	GENERATED_BODY()
-	
+
 private:
 	// The number of steps on the material
 	UPROPERTY()
@@ -39,7 +39,7 @@ protected:
 
 public:
 	/** this is called when a foot touches a material with a pollutionfactor
-		@PhysMat: the physcial material is used to get the PollutionFactor 
+	@PhysMat: the physcial material is used to get the PollutionFactor
 	*/
 	void increasePollution(UPhysMaterial_EasyFootPrints* PhysMat) override;
 
@@ -47,11 +47,11 @@ public:
 	bool const hasPollution() override;
 
 	/** Spawns a DecalActor which is a pollution footprint
-		@transform The transform for spawning the decal
-		@Material: the material that will be used by the decal-actor
-		@World: the current world to spawn in 
+	@transform The transform for spawning the decal
+	@Material: the material that will be used by the decal-actor
+	@World: the current world to spawn in
 	*/
 	void createPollutionFootPrint(FTransform transform, UMaterialInstanceDynamic* Material, UWorld* World) override;
-	
-	
+
+
 };

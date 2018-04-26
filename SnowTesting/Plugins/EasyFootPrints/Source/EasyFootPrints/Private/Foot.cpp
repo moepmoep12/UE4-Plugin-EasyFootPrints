@@ -30,10 +30,10 @@ void UFoot::IncreaseFootPollution()
 	PollutionComponent->increasePollution(PhysMat);
 }
 
-void UFoot::createPollutionFootPrint( UWorld* world, FVector Scale)
+void UFoot::createPollutionFootPrint(UWorld* world, FVector Scale)
 {
 	FTransform transform = FTransform(Rotation, Location, Scale);
-	PollutionComponent->createPollutionFootPrint(transform, PollutionMaterial,world);
+	PollutionComponent->createPollutionFootPrint(transform, PollutionMaterial, world);
 }
 
 float UFoot::getDepth()
@@ -81,7 +81,7 @@ void UFoot::updateHitMaterial()
 		PhysMat = Cast<UPhysMaterial_EasyFootPrints>(HitMaterial->GetPhysicalMaterial());
 	}
 	RenderTargetValues.RenderTargetOfHitMaterial = Cast<UTextureRenderTarget2D>(RenderTexture);
-	
+
 }
 
 FRenderTargetValues * UFoot::getRenderTargetValues()
@@ -104,13 +104,13 @@ void UFoot::updateRenderTargetValues()
 	RenderTargetValues.ActorScale = FVector2D(Hitresult.Actor->GetActorScale().X, Hitresult.Actor->GetActorScale().Y);
 	RenderTargetValues.HitLocation = FVector2D(Hitresult.Location.X, Hitresult.Location.Y);
 	RenderTargetValues.Rotation = Rotation.Yaw;
-	RenderTargetValues.Density = (PhysMat!=nullptr) ? PhysMat->Density : 0;
+	RenderTargetValues.Density = (PhysMat != nullptr) ? PhysMat->Density : 0;
 }
 
 UParticleSystem * UFoot::getParticleEffect()
 {
 
-	return PhysMat!= nullptr ? PhysMat->ParticleSystem : nullptr;
+	return PhysMat != nullptr ? PhysMat->ParticleSystem : nullptr;
 }
 
 UParticleSystem * UFoot::getPollutionParticleEffect()
@@ -120,5 +120,5 @@ UParticleSystem * UFoot::getPollutionParticleEffect()
 
 USoundBase * UFoot::getFootPrintSound()
 {
-	return PhysMat!=nullptr ? PhysMat->FootstepSound : nullptr;
+	return PhysMat != nullptr ? PhysMat->FootstepSound : nullptr;
 }

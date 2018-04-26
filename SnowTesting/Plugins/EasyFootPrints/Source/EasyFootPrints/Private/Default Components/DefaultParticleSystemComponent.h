@@ -7,17 +7,17 @@
 #include "DefaultParticleSystemComponent.generated.h"
 
 /**
- * 
- */
+*
+*/
 UCLASS()
 class UDefaultParticleSystemComponent : public UBaseParticleSystemComponent
 {
 	GENERATED_BODY()
-	
-	
+
+
 public:
-	virtual void spawnParticleEmitter(FVector Location, float TessellationHeight , UParticleSystem* ParticleEffect) override;
+	virtual void spawnParticleEmitter(FVector Location, float TessellationHeight, UParticleSystem* ParticleEffect) override;
 
 	void spawnPollutionParticleEffect(FVector Location, float Pollution, UParticleSystem* ParticleEffect) override;
-	
+
 };

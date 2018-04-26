@@ -23,11 +23,12 @@ class EASYFOOTPRINTS_API UFootPrintComponent : public UActorComponent
 
 public:
 	// The array represents all bones that should be tracked by this plugin, insert bone names here
-	UPROPERTY(BluePrintReadWrite, EditAnyWhere, Category= Bones)
+	UPROPERTY(BluePrintReadWrite, EditAnyWhere, Category = Bones)
 		TArray<FName> BoneNames;
 
 	// The name of the bone that is the centre of the skeleton
 	// This is used to determine if a foot is left/right
+	// default = "pelvis"
 	UPROPERTY(BluePrintReadWrite, EditAnyWhere, Category = Bones)
 		FName CentralBone = "pelvis";
 
@@ -43,7 +44,7 @@ public:
 	// Where white = no deformation, black = full deformation
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = FootPrintShape)
 		UTexture* FootPrintShapeTexture;
-	
+
 	// A transform that affects the shape of the footprints
 	// Only Scaling is currently supported
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = FootPrintShape)
@@ -125,8 +126,10 @@ public:
 	// Constructor
 	UFootPrintComponent();
 
+	/* This represents the main function of the plugin. It should be called whenever a foot touches the ground */
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Create FootPrints", Keywords = "print plugin"), Category = "EasyFootPrints")
 		void OnFootDown();
+
 	UFUNCTION()
 		UFoot* getFootOnGround() { return FootOnGround; };
 	UFUNCTION()

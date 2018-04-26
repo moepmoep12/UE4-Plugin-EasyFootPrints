@@ -48,11 +48,12 @@ void UFootPrintComponent::BeginPlay()
 	setFootMaterials();
 }
 
-/** creates components from the specified class; 
-	* if not specified, default components will be used */
+/** creates components from the specified class;
+* if not specified, default components will be used */
 void UFootPrintComponent::initComponents()
 {
 	RenderTargetComputations = NewObject<UBaseRenderTargetComponent>(this, RenderTargetComponent);
+	RenderTargetComputations->RegisterComponent();
 	MovementComputations = NewObject<UBaseMovementAdjustmentComponent>(this, AdjMovementComponent);
 	ParticleSystem = NewObject<UBaseParticleSystemComponent>(this, ParticleSystemComponent);
 	SoundComputations = NewObject<UBaseSoundComponent>(this, SoundComponent);
@@ -71,7 +72,7 @@ void UFootPrintComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 
 /**	This represents the main loop of the plugin
-	* it will be called whenever a foot touches the ground */
+* it will be called whenever a foot touches the ground */
 void UFootPrintComponent::OnFootDown()
 {
 	if (!Player) {
@@ -97,7 +98,7 @@ void UFootPrintComponent::OnFootDown()
 
 		if (FootOnGround->HasPollution())
 		{
-			FootOnGround->createPollutionFootPrint( GetWorld(), PollutionFootPrintsScale);
+			FootOnGround->createPollutionFootPrint(GetWorld(), PollutionFootPrintsScale);
 			emittPolutionParticleEffect();
 		}
 	}
@@ -108,10 +109,10 @@ void UFootPrintComponent::OnFootDown()
 void UFootPrintComponent::drawOnRenderTarget()
 {
 	FRenderTargetValues* RenderTargetValues = FootOnGround->getRenderTargetValues();
-	RenderTargetComputations->drawOnRenderTarget_Implementation(FootOnGround->getFootPrintShape(), *RenderTargetValues, FootPrintShapeTransform );
+	RenderTargetComputations->drawOnRenderTarget_Implementation(FootOnGround->getFootPrintShape(), *RenderTargetValues, FootPrintShapeTransform);
 }
 
-/** Sets location of every foot based on the bone position	*/ 
+/** Sets location of every foot based on the bone position	*/
 void UFootPrintComponent::LoadFootPositions()
 {
 	for (UFoot* f : TrackedFeet)
@@ -127,7 +128,7 @@ void UFootPrintComponent::initFeet()
 		UE_LOG(LogTemp, Warning, TEXT("Bone Amount is <= 0"))
 			return;
 	}
-	
+
 	if (TrackedFeet.Num() != BoneNames.Num())
 	{
 		TrackedFeet.Empty();
@@ -142,7 +143,7 @@ void UFootPrintComponent::initFeet()
 	}
 }
 /** Determines for every foot if its right or left and sets its material accordingly
-	TO-DO : improve If-statement to be more accurate
+TO-DO : improve If-statement to be more accurate
 */
 void UFootPrintComponent::setFootMaterials()
 {
@@ -191,7 +192,7 @@ void UFootPrintComponent::Trace()
 }
 
 /** Calculates the foot that is closest to the ground and set it to FootOnGround
-	* To-Do: Implement Lambda for Sorting */
+* To-Do: Implement Lambda for Sorting */
 void UFootPrintComponent::setFootOnGround()
 {
 	//FootValues.TrackedFeet.Sort([](UFoot* f1, UFoot* f2) { return f1->getLocation().Z > f2->getLocation().Z; });
@@ -205,7 +206,7 @@ void UFootPrintComponent::setFootOnGround()
 			key = i;
 		}
 	}
-	
+
 	FootOnGround = TrackedFeet[key];
 	FootOnGround->updateHitMaterial();
 }

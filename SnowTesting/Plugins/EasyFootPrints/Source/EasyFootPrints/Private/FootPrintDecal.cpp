@@ -5,7 +5,7 @@
 
 /* Decalsize is set on the specified value
 */
-AFootPrintDecal::AFootPrintDecal() 
+AFootPrintDecal::AFootPrintDecal()
 {
 	GetDecal()->DecalSize = FVector(20, 30, 20);
 }

@@ -8,8 +8,8 @@
 #include "Foot.generated.h"
 
 /** This class represents a foot, for every specified bone its own foot instance will be created
- * 
- */
+*
+*/
 class UTextureRenderTarget2D;
 class UPhysMaterial_EasyFootPrints;
 
@@ -85,11 +85,11 @@ public:
 	void setBoneName(FName name) { Name = name; }
 	void setFootPrintShape(UMaterialInstanceDynamic* FootPrintShape) { FootPrintShapeInstance = FootPrintShape; };
 	void setPollutionMaterial(UMaterialInstanceDynamic* PollutionMat) { PollutionMaterial = PollutionMat; };
-	
+
 	void IncreaseFootPollution();
 	bool hasHitComponentRenderTarget();
 	void updateHitMaterial();
 	void initPollutionComponent(TSubclassOf<UBasePollutionComponent> PollutionComp);
-	void createPollutionFootPrint( UWorld* world, FVector Scale= FVector(1,1,1));
-	
+	void createPollutionFootPrint(UWorld* world, FVector Scale = FVector(1, 1, 1));
+
 };

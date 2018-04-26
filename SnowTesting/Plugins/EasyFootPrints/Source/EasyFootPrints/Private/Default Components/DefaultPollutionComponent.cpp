@@ -10,7 +10,7 @@
 
 
 /** this is called when a foot touches a material with a pollutionfactor
-	@PhysMat: Used for getting the PollutionFactor, aswell as adding Pollution if Physmat hasn't changed since the last step
+@PhysMat: Used for getting the PollutionFactor, aswell as adding Pollution if Physmat hasn't changed since the last step
 */
 void UDefaultPollutionComponent::increasePollution(UPhysMaterial_EasyFootPrints* PhysMat)
 {
@@ -50,16 +50,16 @@ bool const UDefaultPollutionComponent::hasPollution()
 }
 
 /** Spawns a DecalActor which is a pollution footprint
-	@transform The transform for spawning the decal
-	@Material: the material that will be used by the decal-actor
-	@World: the current world to spawn in
+@transform The transform for spawning the decal
+@Material: the material that will be used by the decal-actor
+@World: the current world to spawn in
 */
 void UDefaultPollutionComponent::createPollutionFootPrint(FTransform transform, UMaterialInstanceDynamic * Material, UWorld* World)
 {
 	if (!World) {
 		return;
 	}
-	ADecalActor* Adecal = World->SpawnActor<ADecalActor>(AFootPrintDecal::StaticClass(),transform);
+	ADecalActor* Adecal = World->SpawnActor<ADecalActor>(AFootPrintDecal::StaticClass(), transform);
 	Adecal->SetDecalMaterial(Material);
 	//UMaterialInstanceDynamic* matinstance = Adecal->CreateDynamicMaterialInstance();
 	//Adecal->SetDecalMaterial(matinstance);

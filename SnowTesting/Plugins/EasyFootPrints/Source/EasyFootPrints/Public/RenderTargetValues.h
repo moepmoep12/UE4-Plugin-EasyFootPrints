@@ -5,33 +5,32 @@
 
 class UTextureRenderTarget2D;
 
+/* This struct holds several values that are necessary for drawing onto a rendertarget*/
+
 USTRUCT(BlueprintType)
 struct FRenderTargetValues
 {
 	GENERATED_BODY()
 
-	// The location of the hit actor
+	// the location of the hit actor
 	UPROPERTY()
 		FVector2D ActorLocation;
-
-	// the x-y scale of the hit actor
+	// the scale of the hit actor
 	UPROPERTY()
 		FVector2D ActorScale;
-
 	// the actor bounds of the hit actor
 	UPROPERTY()
 		FVector2D ActorBounds;
-
 	// the world location of the hit
 	UPROPERTY()
 		FVector2D HitLocation;
-
+	// the rotation of the foot
 	UPROPERTY()
 		float Rotation;
-
+	// the rendertarget of the hit material to draw onto
 	UPROPERTY()
 		UTextureRenderTarget2D* RenderTargetOfHitMaterial;
-
+	// the density of the hit material, defined in its physical material
 	UPROPERTY()
 		int32 Density;
 

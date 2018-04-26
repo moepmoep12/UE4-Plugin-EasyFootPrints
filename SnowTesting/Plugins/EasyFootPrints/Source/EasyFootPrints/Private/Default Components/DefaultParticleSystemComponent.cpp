@@ -5,7 +5,7 @@
 #include "Particles/ParticleSystem.h"
 
 
-void UDefaultParticleSystemComponent::spawnParticleEmitter(FVector Location, float TessellationHeight , UParticleSystem* ParticleEffect) {
+void UDefaultParticleSystemComponent::spawnParticleEmitter(FVector Location, float TessellationHeight, UParticleSystem* ParticleEffect) {
 
 	if (!ParticleEffect) {
 		return;

@@ -11,10 +11,12 @@
 #include "FootPrintComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
-
-void UDefaultRenderTargetComponent::BeginPlay()
+/* Clears all RenderTarget that were used for drawing */
+void UDefaultRenderTargetComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-
+	for (UTextureRenderTarget2D* rt : RenderTargets) {
+		UKismetRenderingLibrary::ClearRenderTarget2D(GetOwner(), rt);
+	}
 }
 
 
@@ -33,6 +35,10 @@ void UDefaultRenderTargetComponent::drawOnRenderTarget_Implementation(UMaterialI
 
 	if (!RenderTargetValues.RenderTargetOfHitMaterial) {
 		return;
+	}
+
+	if (!RenderTargets.Contains(RenderTargetValues.RenderTargetOfHitMaterial)) {
+		RenderTargets.Add(RenderTargetValues.RenderTargetOfHitMaterial);
 	}
 
 	UKismetRenderingLibrary::BeginDrawCanvasToRenderTarget(GetOwner(), RenderTargetValues.RenderTargetOfHitMaterial, Canvas, ScreenSize, Context);
@@ -61,23 +67,23 @@ FVector2D UDefaultRenderTargetComponent::CalculateScreenPosition() {
 	int32 RenderTargetSizeX = RenderTargetValues.RenderTargetOfHitMaterial->SizeX;
 	int32 RenderTargetSizeY = RenderTargetValues.RenderTargetOfHitMaterial->SizeY;
 	FVector2D FootPrintShapeSize = CalculateFootShapeSize();
-	
+
 
 	// calculate a relative position on the landscape 
 	FVector2D RelativePosition = RenderTargetValues.ActorLocation - RenderTargetValues.HitLocation;
 
 	// calculates the offset that needs to be adjusted due to scaling of the landscape
 	FVector2D offset = CalculatePositionOffset(RelativePosition);
-	
-	// transform the relative position adjusted by the offset into a percentage of the overall landscape size 
-	float PercentX = UKismetMathLibrary::Abs( ( RelativePosition.X - offset.X ) / RenderTargetValues.ActorBounds.X);
-	float PercentY = UKismetMathLibrary::Abs( ( RelativePosition.Y - offset.Y ) / RenderTargetValues.ActorBounds.Y);
 
-	
+	// transform the relative position adjusted by the offset into a percentage of the overall landscape size 
+	float PercentX = UKismetMathLibrary::Abs((RelativePosition.X - offset.X) / RenderTargetValues.ActorBounds.X);
+	float PercentY = UKismetMathLibrary::Abs((RelativePosition.Y - offset.Y) / RenderTargetValues.ActorBounds.Y);
+
+
 	ScreenPosition = FVector2D(RenderTargetSizeX * PercentX, RenderTargetSizeY * PercentY);
 
 	// move the FootPrintShape into the centre of its coordinate system
-	ScreenPosition = FVector2D(ScreenPosition.X - (0.5f * FootPrintShapeSize.X) , ScreenPosition.Y - (0.5f * FootPrintShapeSize.Y));
+	ScreenPosition = FVector2D(ScreenPosition.X - (0.5f * FootPrintShapeSize.X), ScreenPosition.Y - (0.5f * FootPrintShapeSize.Y));
 
 	return ScreenPosition;
 }

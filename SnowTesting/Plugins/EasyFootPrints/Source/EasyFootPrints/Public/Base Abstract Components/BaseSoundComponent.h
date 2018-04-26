@@ -6,6 +6,9 @@
 #include "Components/ActorComponent.h"
 #include "BaseSoundComponent.generated.h"
 
+/** This is an abstract base class for a Sound Component.
+*   It's responsible for playing a sound when a foot hits the ground
+*/
 
 UCLASS( ClassGroup=(EasyFootPrints), abstract )
 class EASYFOOTPRINTS_API UBaseSoundComponent : public UActorComponent

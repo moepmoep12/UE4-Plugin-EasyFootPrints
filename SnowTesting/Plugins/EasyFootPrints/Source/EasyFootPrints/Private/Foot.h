@@ -90,6 +90,6 @@ public:
 	bool hasHitComponentRenderTarget();
 	void updateHitMaterial();
 	void initPollutionComponent(TSubclassOf<UBasePollutionComponent> PollutionComp);
-	void createPollutionFootPrint(UMaterialInterface* Material, UWorld* world);
+	void createPollutionFootPrint( UWorld* world, FVector Scale= FVector(1,1,1));
 	
 };

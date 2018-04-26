@@ -31,15 +31,21 @@ public:
 	UPROPERTY(BluePrintReadWrite, EditAnyWhere, Category = Bones)
 		FName CentralBone = "pelvis";
 
-	// The material that will be used when creating pollution footprints
-	UPROPERTY(BluePrintReadWrite, EditAnyWhere)
-		UMaterialInterface* PollutionFootPrintMaterial;
+	// The texture that is used for creating PollutionFootPrints
+	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = PollutionFootPrints)
+		UTexture* PollutionFootPrintTexture;
 
-	// The material which defines the shape that will deform the landscape
+	// The scaling of the PollutionFootPrints
+	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = PollutionFootPrints)
+		FVector PollutionFootPrintsScale = FVector(1, 1, 1);
+
+	// The texture defines the shape of the footprints that are deforming the terrain
+	// Where white = no deformation, black = full deformation
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = FootPrintShape)
-		UMaterialInterface* FootPrintShapeMaterial;
-
+		UTexture* FootPrintShapeTexture;
+	
 	// A transform that affects the shape of the footprints
+	// Only Scaling is currently supported
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = FootPrintShape)
 		FTransform FootPrintShapeTransform;
 
@@ -76,9 +82,17 @@ private:
 	UPROPERTY()
 		TArray<UFoot*> TrackedFeet;
 
-	//
+	// the location of the central bone
 	UPROPERTY()
 		FVector CentralBoneLocation;
+
+	// the material of the footprint shape, reference will be set in constructor
+	UPROPERTY()
+		UMaterialInterface* FootPrintShapeMaterial;
+
+	// the material for creating PollutionFootPrints, reference will be set in contructor 
+	UPROPERTY()
+		UMaterialInterface* PollutionFootPrintMaterial;
 
 	/** the following components are used for several calculations and will be created from the corresponding component class */
 	UPROPERTY()

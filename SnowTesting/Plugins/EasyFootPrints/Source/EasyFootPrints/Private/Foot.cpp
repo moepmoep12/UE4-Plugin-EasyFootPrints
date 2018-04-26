@@ -30,9 +30,10 @@ void UFoot::IncreaseFootPollution()
 	PollutionComponent->increasePollution(PhysMat);
 }
 
-void UFoot::createPollutionFootPrint(UMaterialInterface * Material, UWorld* world)
+void UFoot::createPollutionFootPrint( UWorld* world, FVector Scale)
 {
-	PollutionComponent->createPollutionFootPrint(Location, Rotation, PollutionMaterial,world);
+	FTransform transform = FTransform(Rotation, Location, Scale);
+	PollutionComponent->createPollutionFootPrint(transform, PollutionMaterial,world);
 }
 
 float UFoot::getDepth()

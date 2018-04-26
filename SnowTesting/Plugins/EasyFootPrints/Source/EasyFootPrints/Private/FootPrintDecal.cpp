@@ -3,7 +3,8 @@
 #include "FootPrintDecal.h"
 #include "Components/DecalComponent.h"
 
-
+/* Decalsize is set on the specified value
+*/
 AFootPrintDecal::AFootPrintDecal() 
 {
 	GetDecal()->DecalSize = FVector(20, 30, 20);

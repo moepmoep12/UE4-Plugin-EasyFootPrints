@@ -10,6 +10,10 @@
 // Forward Declaration
 class UFootPrintComponent;
 
+
+/** This is an abstract base class for a MovementAdjustment Component.
+*   When a player walks through a material with tessellation the component is responsible for adjusting the movement
+*/
 UCLASS( ClassGroup=(EasyFootPrints), abstract )
 class EASYFOOTPRINTS_API UBaseMovementAdjustmentComponent : public UActorComponent
 {

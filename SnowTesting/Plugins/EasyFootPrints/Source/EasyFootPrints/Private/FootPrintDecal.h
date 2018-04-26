@@ -7,8 +7,9 @@
 #include "FootPrintDecal.generated.h"
 
 /**
- * 
+ *  The DecalActor that is spawned for creating PollutionFootPrints
  */
+
 UCLASS()
 class AFootPrintDecal : public ADecalActor
 {

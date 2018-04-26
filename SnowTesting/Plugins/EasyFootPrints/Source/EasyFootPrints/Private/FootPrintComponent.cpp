@@ -10,6 +10,7 @@
 #include "Default Components/DefaultMovementAdjustmentComp.h"
 #include "Default Components/DefaultParticleSystemComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "ConstructorHelpers.h"
 #include "PhysMaterial_EasyFootPrints.h"
 
 
@@ -17,6 +18,19 @@
 UFootPrintComponent::UFootPrintComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+
+	/// Find the FootPrintShape Material
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> Material(TEXT("Material'/EasyFootPrints/Materials/FootPrintShape.FootPrintShape'"));
+	/// Find the PollutionFootPrint Material
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> PollutionMaterial(TEXT("Material'/EasyFootPrints/Materials/PollutionMaterial.PollutionMaterial'"));
+
+	if (Material.Object != NULL)
+	{
+		FootPrintShapeMaterial = (UMaterialInterface*)Material.Object;
+	}
+	if (PollutionMaterial.Object != NULL) {
+		PollutionFootPrintMaterial = (UMaterialInterface*)PollutionMaterial.Object;
+	}
 }
 
 
@@ -83,7 +97,7 @@ void UFootPrintComponent::OnFootDown()
 
 		if (FootOnGround->HasPollution())
 		{
-			FootOnGround->createPollutionFootPrint(PollutionFootPrintMaterial, GetWorld());
+			FootOnGround->createPollutionFootPrint( GetWorld(), PollutionFootPrintsScale);
 			emittPolutionParticleEffect();
 		}
 	}
@@ -136,10 +150,18 @@ void UFootPrintComponent::setFootMaterials()
 	UMaterialInstanceDynamic* FootPrintShape_Left = UMaterialInstanceDynamic::Create(FootPrintShapeMaterial, this);
 	UMaterialInstanceDynamic* PollutionMaterial_Right = UMaterialInstanceDynamic::Create(PollutionFootPrintMaterial, this);
 	UMaterialInstanceDynamic* PollutionMaterial_Left = UMaterialInstanceDynamic::Create(PollutionFootPrintMaterial, this);
+	// Mirror the texture on left feet
 	FootPrintShape_Left->SetScalarParameterValue(FName("Mirror"), -1.0f);
 	PollutionMaterial_Left->SetScalarParameterValue(FName("Mirror"), -1.0f);
+	// Set FootPrintShapeTexture
+	FootPrintShape_Left->SetTextureParameterValue(FName("Texture"), FootPrintShapeTexture);
+	FootPrintShape_Right->SetTextureParameterValue(FName("Texture"), FootPrintShapeTexture);
+	// Set PollutionTexture
+	PollutionMaterial_Left->SetTextureParameterValue(FName("Texture"), PollutionFootPrintTexture);
+	PollutionMaterial_Right->SetTextureParameterValue(FName("Texture"), PollutionFootPrintTexture);
 
 	for (UFoot* f : TrackedFeet) {
+		/// NEEDS IMPROVEMENT
 		if (Player->GetMesh()->GetBoneLocation(f->getBoneName()).X > Player->GetMesh()->GetBoneLocation(CentralBone).X) {
 			f->setFootPrintShape(FootPrintShape_Right);
 			f->setPollutionMaterial(PollutionMaterial_Right);

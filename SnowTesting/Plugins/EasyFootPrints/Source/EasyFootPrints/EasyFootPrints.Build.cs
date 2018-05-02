@@ -30,6 +30,8 @@ public class EasyFootPrints : ModuleRules
             new string[]
             {
                 "Core",
+                "LevelEditor",
+                "EditorStyle"
                 
 				// ... add other public dependencies that you statically link with here ...
 			}
@@ -53,7 +55,7 @@ public class EasyFootPrints : ModuleRules
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{
-				// ... add any modules that your module loads dynamically here ...
+                // ... add any modules that your module loads dynamically here ...
 			}
 			);
 	}

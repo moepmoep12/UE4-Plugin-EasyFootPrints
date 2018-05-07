@@ -57,7 +57,7 @@ FVector2D UDefaultRenderTargetComponent::CalculateFootShapeSize() {
 	int32 XSize = RenderTargetValues.RenderTargetOfHitMaterial->SizeX;
 	int32 YSize = RenderTargetValues.RenderTargetOfHitMaterial->SizeY;
 
-	FVector2D ScreenSize = FVector2D(XSize * (1 / RenderTargetValues.ActorScale.X), YSize * (1 / RenderTargetValues.ActorScale.Y));
+	FVector2D ScreenSize = FVector2D(ShapeTransform.GetLocation().X/0.577f * (XSize / RenderTargetValues.ActorBounds.X), ShapeTransform.GetLocation().Y / 0.577f * (YSize / RenderTargetValues.ActorBounds.Y));
 	ScreenSize = FVector2D(ScreenSize.X * ShapeTransform.GetScale3D().X, ScreenSize.Y * ShapeTransform.GetScale3D().Y);
 	return ScreenSize;
 }

@@ -48,7 +48,7 @@ public:
 	// A transform that affects the shape of the footprints
 	// Only Scaling is currently supported
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = FootPrintShape)
-		FTransform FootPrintShapeTransform;
+		FTransform FootPrintShapeTransform = FTransform(FQuat(0.0f,0.0f,0.0f,0.0f), FVector(10, 22, 0), FVector(1, 1, 1));
 
 	/*
 	/	the classes for the components are defined here

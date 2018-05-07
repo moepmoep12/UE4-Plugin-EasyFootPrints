@@ -9,6 +9,7 @@
 void FEasyFootPrintsModule::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
+	/**
 	FFootprintsPluginEditorCommands::Register();
 
 	PluginCommands = MakeShareable(new FUICommandList);
@@ -21,6 +22,9 @@ void FEasyFootPrintsModule::StartupModule()
 
 	
 		TSharedPtr<FExtender> NewToolbarExtender = MakeShareable(new FExtender);
+
+		*/
+
 		/**
 		* Extends a tool bar at the specified extension point
 		*
@@ -31,14 +35,15 @@ void FEasyFootPrintsModule::StartupModule()
 		*
 		* @return	Pointer to the new extension object.  You can use this later to remove the extension.
 		*/
+	/*
 		NewToolbarExtender->AddToolBarExtension("Content",
 			EExtensionHook::Before,
 			PluginCommands,
 			FToolBarExtensionDelegate::CreateRaw(this, &FEasyFootPrintsModule::AddToolbarButton));
 		LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(NewToolbarExtender);
-	
+	*/
 }
-
+/*
 void FEasyFootPrintsModule::OpenTheWiki()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Opens Wiki of the Footprints Plugin!"));
@@ -49,7 +54,7 @@ void FEasyFootPrintsModule::AddToolbarButton(FToolBarBuilder& Builder)
 {
 	Builder.AddToolBarButton(FFootprintsPluginEditorCommands::Get().OpensWiki);
 }
-
+*/
 void FEasyFootPrintsModule::ShutdownModule()
 {
 	

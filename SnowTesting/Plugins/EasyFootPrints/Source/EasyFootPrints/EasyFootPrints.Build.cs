@@ -30,8 +30,8 @@ public class EasyFootPrints : ModuleRules
             new string[]
             {
                 "Core",
-                "LevelEditor",
-                "EditorStyle"
+               // "LevelEditor",
+                //"EditorStyle"
                 
 				// ... add other public dependencies that you statically link with here ...
 			}

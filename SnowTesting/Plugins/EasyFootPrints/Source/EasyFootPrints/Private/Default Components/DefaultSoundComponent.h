@@ -15,7 +15,7 @@ class UDefaultSoundComponent : public UBaseSoundComponent
 	GENERATED_BODY()
 	
 public:
-	void playFootPrintSound(FVector Location, USoundBase* Sound) override;
+	void playFootPrintSound_Implementation(FVector Location, USoundBase* Sound) override;
 	
 	
 };

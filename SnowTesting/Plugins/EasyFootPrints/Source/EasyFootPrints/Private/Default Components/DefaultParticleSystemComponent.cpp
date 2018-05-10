@@ -5,7 +5,7 @@
 #include "Particles/ParticleSystem.h"
 
 
-void UDefaultParticleSystemComponent::spawnParticleEmitter(FVector Location, float TessellationHeight, UParticleSystem* ParticleEffect) {
+void UDefaultParticleSystemComponent::spawnParticleEmitter_Implementation(FVector Location, float TessellationHeight, UParticleSystem* ParticleEffect) {
 
 	if (!ParticleEffect) {
 		return;
@@ -15,7 +15,7 @@ void UDefaultParticleSystemComponent::spawnParticleEmitter(FVector Location, flo
 	UGameplayStatics::SpawnEmitterAtLocation(this, ParticleEffect, Location);
 }
 
-void UDefaultParticleSystemComponent::spawnPollutionParticleEffect(FVector Location, float Pollution, UParticleSystem * ParticleEffect)
+void UDefaultParticleSystemComponent::spawnPollutionParticleEffect_Implementation(FVector Location, float Pollution, UParticleSystem * ParticleEffect)
 {
 	if (!ParticleEffect) {
 		return;

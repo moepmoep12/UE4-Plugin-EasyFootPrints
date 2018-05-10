@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -9,35 +7,44 @@
 
 class UMaterialInterface;
 
-/** This is an abstract base class for a Pollution Component.
-*   Each foot has its own PollutionComponent which is responsible for creating PollutionFootPrints ( Decals )
+/* The abstract base class for PollutionComponents. Every foot has its own PollutionComponent. It determines the amount of pollution a foot has and how much it increases/decreases.
+* The class can be parent to blueprints and methods can be overriden in blueprint
 */
 
-UCLASS(ClassGroup = (EasyFootPrints), abstract)
+UCLASS(ClassGroup = (EasyFootPrints), meta = (IsBlueprintBase = "true"), abstract)
 class EASYFOOTPRINTS_API UBasePollutionComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-
 protected:
-	// Called when the game starts
-	virtual void BeginPlay() override {};
+	// the amount of pollution of a foot
+	UPROPERTY(meta = (ClampMin = "0.0", ClampMax = "1.0"))
+		float Pollution = 0.0f;
 
 public:
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override {};
 
-	/** this is called when a foot touches a material with a pollutionfactor
-	@PhysMat: the physcial material is used to get the PollutionFactor */
-	virtual void increasePollution(UPhysMaterial_EasyFootPrints* PhysMat) {};
+	/** Increases the amount of pollution of the foot this component belongs to
+	@PhysMat: The physical material of the material the character is walking on */
+	UFUNCTION(BluePrintNativeEvent, meta = (DisplayName = "Increase Foot Pollution", Keywords = "foot pollution increase footprint plugin"), Category = "EasyFootPrints")
+		void increasePollution(UPhysMaterial_EasyFootPrints* PhysMat);
 
-	/** Spawns a DecalActor which is a pollution footprint
+	virtual void increasePollution_Implementation(UPhysMaterial_EasyFootPrints* PhysMat) { increasePollution(PhysMat); };
+
+	/** Spawns a pollution footprint as a decal actor with the specified material and transform
 	@transform The transform for spawning the decal
 	@Material: the material that will be used by the decal-actor
 	@World: the current world to spawn in */
-	virtual void createPollutionFootPrint(FTransform transform, UMaterialInstanceDynamic* Material, UWorld* World) {};
+	UFUNCTION(BluePrintNativeEvent, meta = (DisplayName = "Create Pollution Footprint", Keywords = "foot pollution create footprint plugin"), Category = "EasyFootPrints")
+		void createPollutionFootPrint(FTransform transform, UMaterialInstanceDynamic* Material, UWorld* World);
 
-	/** Returns true if the component has pollution > 0  */
-	virtual bool const hasPollution() { return false; };
+	virtual void createPollutionFootPrint_Implementation(FTransform transform, UMaterialInstanceDynamic* Material, UWorld* World) { 
+		createPollutionFootPrint(transform,Material,World); 
+	};
+
+	/** Returns whether the foot is polluted  */
+	UFUNCTION(BluePrintNativeEvent, meta = (DisplayName = "Has Pollution", Keywords = "foot pollution  footprint plugin"), Category = "EasyFootPrints")
+		 bool  hasPollution() const;
+
+	virtual bool hasPollution_Implementation() const { return hasPollution(); };
 
 };

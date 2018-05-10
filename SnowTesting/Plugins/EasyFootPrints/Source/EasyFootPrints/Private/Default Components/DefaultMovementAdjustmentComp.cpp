@@ -20,7 +20,7 @@ void UDefaultMovementAdjustmentComp::saveOriginalMovementValues()
 }
 
 
-void UDefaultMovementAdjustmentComp::adjustMovement(float depth)
+void UDefaultMovementAdjustmentComp::adjustMovement_Implementation(float depth)
 {
 	adjustMaxWalkSpeed(depth);
 	adjustJumpVelocity(depth);
@@ -47,7 +47,7 @@ void UDefaultMovementAdjustmentComp::adjustJumpVelocity(float depth)
 }
 
 
-void UDefaultMovementAdjustmentComp::resetMovement()
+void UDefaultMovementAdjustmentComp::resetMovement_Implementation()
 {
 	if (MovementComponent->MaxWalkSpeed != OriginaMaxWalkingSpeed) {
 		MovementComponent->MaxWalkSpeed = OriginaMaxWalkingSpeed;

@@ -142,9 +142,8 @@ void UFootPrintComponent::initFeet()
 		}
 	}
 }
-/** Determines for every foot if its right or left and sets its material accordingly
-TO-DO : improve If-statement to be more accurate
-*/
+
+/** Determines for every foot if its right or left and sets its material accordingly */
 void UFootPrintComponent::setFootMaterials()
 {
 	UMaterialInstanceDynamic* FootPrintShape_Right = UMaterialInstanceDynamic::Create(FootPrintShapeMaterial, this);
@@ -162,8 +161,10 @@ void UFootPrintComponent::setFootMaterials()
 	PollutionMaterial_Right->SetTextureParameterValue(FName("Texture"), PollutionFootPrintTexture);
 
 	for (UFoot* f : TrackedFeet) {
-		/// NEEDS IMPROVEMENT
-		if (Player->GetMesh()->GetBoneLocation(f->getBoneName()).X > Player->GetMesh()->GetBoneLocation(CentralBone).X) {
+		FRotator rot = Player->GetActorRotation().GetInverse();
+		FVector FootLocation = Player->GetMesh()->GetBoneLocation(f->getBoneName());
+		FVector PelvisLocation = Player->GetMesh()->GetBoneLocation(CentralBone);
+		if (rot.RotateVector(PelvisLocation - FootLocation).X > 0) {
 			f->setFootPrintShape(FootPrintShape_Right);
 			f->setPollutionMaterial(PollutionMaterial_Right);
 		}

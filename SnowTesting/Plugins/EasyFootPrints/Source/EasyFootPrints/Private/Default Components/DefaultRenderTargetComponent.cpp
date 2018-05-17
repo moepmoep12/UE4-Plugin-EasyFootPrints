@@ -22,7 +22,7 @@ void UDefaultRenderTargetComponent::EndPlay(const EEndPlayReason::Type EndPlayRe
 
 
 
-void UDefaultRenderTargetComponent::drawOnRenderTarget_Implementation(UMaterialInterface * FootPrintShape, struct FRenderTargetValues&  RenderTargetValues, FTransform ShapeTransform)
+void UDefaultRenderTargetComponent::drawOnRenderTarget_Implementation(UMaterialInterface * FootPrintShape, const FRenderTargetValues&  RenderTargetValues, FTransform ShapeTransform)
 {
 	this->RenderTargetValues = RenderTargetValues;
 	this->ShapeTransform = ShapeTransform;

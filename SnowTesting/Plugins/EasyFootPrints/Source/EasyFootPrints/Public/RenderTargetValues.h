@@ -12,33 +12,33 @@ struct FRenderTargetValues
 {
 	GENERATED_BODY()
 
-	// the location of the hit actor
-	UPROPERTY()
+		// the location of the hit actor
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RenderTarget Values")
 		FVector2D ActorLocation;
 	// the scale of the hit actor
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RenderTarget Values")
 		FVector2D ActorScale;
 	// the actor bounds of the hit actor
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RenderTarget Values")
 		FVector2D ActorBounds;
 	// the world location of the hit
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RenderTarget Values")
 		FVector2D HitLocation;
 	// the rotation of the foot
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RenderTarget Values")
 		float Rotation;
 	// the rendertarget of the hit material to draw onto
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RenderTarget Values")
 		UTextureRenderTarget2D* RenderTargetOfHitMaterial;
 	// the density of the hit material, defined in its physical material
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RenderTarget Values")
 		int32 Density;
 
 	FRenderTargetValues() {
 		RenderTargetOfHitMaterial = nullptr;
 	}
 
-
+	
 	void clear() {
 		this->ActorLocation = FVector2D(0, 0);
 		this->ActorScale = FVector2D(0, 0);

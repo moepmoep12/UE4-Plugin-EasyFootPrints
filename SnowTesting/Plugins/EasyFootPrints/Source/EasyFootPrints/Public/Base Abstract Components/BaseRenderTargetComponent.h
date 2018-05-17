@@ -25,9 +25,9 @@ public:
 	@ShapeTransform: transform that describes size, scale and rotation of the footprint shape
 	*/
 	UFUNCTION(BlueprintNativeEvent, meta = (DisplayName = "Draw on RenderTarget", Keywords = "render target footprint plugin"), Category = "EasyFootPrints")
-		void drawOnRenderTarget(UMaterialInterface * FootPrintShape, struct FRenderTargetValues& RenderTargetValues, FTransform ShapeTransform);
+		void drawOnRenderTarget(UMaterialInterface * FootPrintShape, const FRenderTargetValues& RenderTargetValues, FTransform ShapeTransform);
 
-	virtual void drawOnRenderTarget_Implementation(UMaterialInterface * FootPrintShape, struct FRenderTargetValues& RenderTargetValues, FTransform ShapeTransform) {
+	virtual void drawOnRenderTarget_Implementation(UMaterialInterface * FootPrintShape, const FRenderTargetValues& RenderTargetValues, FTransform ShapeTransform) {
 		drawOnRenderTarget(FootPrintShape,RenderTargetValues,ShapeTransform);
 	}
 

@@ -43,6 +43,6 @@ protected:
 	FVector2D CalculatePositionOffset(FVector2D Position);
 
 public:
-	void drawOnRenderTarget_Implementation(UMaterialInterface * FootPrintShape, struct FRenderTargetValues& RenderTargetValues, FTransform ShapeTransform) override;
+	void drawOnRenderTarget_Implementation(UMaterialInterface * FootPrintShape, const FRenderTargetValues& RenderTargetValues, FTransform ShapeTransform) override;
 
 };

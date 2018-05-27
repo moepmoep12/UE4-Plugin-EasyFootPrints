@@ -27,6 +27,9 @@ void UFoot::initPollutionComponent(TSubclassOf<UBasePollutionComponent> Pollutio
 
 void UFoot::IncreaseFootPollution()
 {
+	if (!PhysMat) {
+		return; 
+	}
 	PollutionComponent->increasePollution(PhysMat);
 }
 

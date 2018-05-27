@@ -26,6 +26,9 @@ private:
 	UPROPERTY()
 		float CurrentJumpVelocity;
 
+	UPROPERTY()
+		UCharacterMovementComponent* CharMovementComp;
+
 protected:
 	void saveOriginalMovementValues();
 	void adjustMaxWalkSpeed(float depth);
@@ -33,7 +36,7 @@ protected:
 
 
 public:
-	virtual void initComponent(UCharacterMovementComponent* MovementComponent) override;
+	virtual void initComponent(UMovementComponent* MovementComponent) override;
 	virtual void adjustMovement_Implementation(float depth) override;
 	virtual void resetMovement_Implementation() override;
 	

@@ -31,6 +31,7 @@ UFootPrintComponent::UFootPrintComponent()
 	if (PollutionMaterial.Object != NULL) {
 		PollutionFootPrintMaterial = (UMaterialInterface*)PollutionMaterial.Object;
 	}
+	
 }
 
 
@@ -39,10 +40,8 @@ void UFootPrintComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (!Player) {
-		Player = Cast<ACharacter>(GetOwner());
-	}
-
+	Player = Cast<APawn>(GetOwner());
+	PlayerMesh = Cast<USkeletalMeshComponent>(GetOwner()->GetComponentByClass(USkeletalMeshComponent::StaticClass()));
 	initComponents();
 	initFeet();
 	setFootMaterials();
@@ -52,73 +51,13 @@ void UFootPrintComponent::BeginPlay()
 * if not specified, default components will be used */
 void UFootPrintComponent::initComponents()
 {
-	RenderTargetComputations = NewObject<UBaseRenderTargetComponent>(this, RenderTargetComponent);
-	RenderTargetComputations->RegisterComponent();
-	MovementComputations = NewObject<UBaseMovementAdjustmentComponent>(this, AdjMovementComponent);
-	ParticleSystem = NewObject<UBaseParticleSystemComponent>(this, ParticleSystemComponent);
-	SoundComputations = NewObject<UBaseSoundComponent>(this, SoundComponent);
-	MovementComputations->initComponent(Cast<UCharacterMovementComponent>(Player->GetMovementComponent()));
-}
+	RenderTargetComponent = RenderTargetComponentClass ? NewObject<UBaseRenderTargetComponent>(this, RenderTargetComponentClass) : nullptr;
+	RenderTargetComponent->RegisterComponent();
+	MovementComponent = AdjMovementComponentClass ? NewObject<UBaseMovementAdjustmentComponent>(this, AdjMovementComponentClass) : nullptr;
+	ParticleSystemComponent = ParticleSystemComponentClass ? NewObject<UBaseParticleSystemComponent>(this, ParticleSystemComponentClass) : nullptr;
+	SoundComponent = SoundComponentClass ? NewObject<UBaseSoundComponent>(this, SoundComponentClass) : nullptr;
+	MovementComponent->initComponent(Player->GetMovementComponent());
 
-
-// Called every frame
-void UFootPrintComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
-}
-
-
-/**	This represents the main loop of the plugin
-* it will be called whenever a foot touches the ground */
-void UFootPrintComponent::OnFootDown()
-{
-	if (!Player) {
-		Player = Cast<ACharacter>(GetOwner());
-	}
-
-	LoadFootPositions();
-	Trace();
-	setFootOnGround();
-
-	if (FootOnGround->hasHitComponentRenderTarget())
-	{
-		drawOnRenderTarget();
-		FootOnGround->IncreaseFootPollution();
-		adjustMovement();
-		emittParticleEffect();
-		playFootPrintSound();
-	}
-
-	else
-	{
-		MovementComputations->resetMovement();
-
-		if (FootOnGround->HasPollution())
-		{
-			FootOnGround->createPollutionFootPrint(GetWorld(), PollutionFootPrintsScale);
-			emittPolutionParticleEffect();
-		}
-	}
-
-}
-
-/**	Calls the drawOnRenderTarget method from the RenderTargetComponent with the specified parameters */
-void UFootPrintComponent::drawOnRenderTarget()
-{
-	FRenderTargetValues* RenderTargetValues = FootOnGround->getRenderTargetValues();
-	RenderTargetComputations->drawOnRenderTarget_Implementation(FootOnGround->getFootPrintShape(), *RenderTargetValues, FootPrintShapeTransform);
-}
-
-/** Sets location of every foot based on the bone position	*/
-void UFootPrintComponent::LoadFootPositions()
-{
-	for (UFoot* f : TrackedFeet)
-	{
-		f->setLocation(Player->GetMesh()->GetBoneLocation(f->getBoneName()));
-	}
 }
 
 /** Creates an array of UFoot for every foot specified in the Array BoneNames  */
@@ -137,7 +76,7 @@ void UFootPrintComponent::initFeet()
 		{
 			UFoot* foot = NewObject<UFoot>();
 			foot->setBoneName(name);
-			foot->initPollutionComponent(PollutionComponent);
+			foot->initPollutionComponent(PollutionComponentClass);
 			TrackedFeet.Add(foot);
 		}
 	}
@@ -146,6 +85,10 @@ void UFootPrintComponent::initFeet()
 /** Determines for every foot if its right or left and sets its material accordingly */
 void UFootPrintComponent::setFootMaterials()
 {
+	if (!PlayerMesh) {
+		return;
+	}
+
 	UMaterialInstanceDynamic* FootPrintShape_Right = UMaterialInstanceDynamic::Create(FootPrintShapeMaterial, this);
 	UMaterialInstanceDynamic* FootPrintShape_Left = UMaterialInstanceDynamic::Create(FootPrintShapeMaterial, this);
 	UMaterialInstanceDynamic* PollutionMaterial_Right = UMaterialInstanceDynamic::Create(PollutionFootPrintMaterial, this);
@@ -162,8 +105,8 @@ void UFootPrintComponent::setFootMaterials()
 
 	for (UFoot* f : TrackedFeet) {
 		FRotator rot = Player->GetActorRotation().GetInverse();
-		FVector FootLocation = Player->GetMesh()->GetBoneLocation(f->getBoneName());
-		FVector PelvisLocation = Player->GetMesh()->GetBoneLocation(CentralBone);
+		FVector FootLocation = PlayerMesh->GetBoneLocation(f->getBoneName());
+		FVector PelvisLocation = PlayerMesh->GetBoneLocation(CentralBone);
 		if (rot.RotateVector(PelvisLocation - FootLocation).X > 0) {
 			f->setFootPrintShape(FootPrintShape_Right);
 			f->setPollutionMaterial(PollutionMaterial_Right);
@@ -174,6 +117,71 @@ void UFootPrintComponent::setFootMaterials()
 		}
 	}
 }
+
+// Called every frame
+void UFootPrintComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	// ...
+}
+
+
+/**	This represents the main loop of the plugin
+* it will be called whenever a foot touches the ground */
+void UFootPrintComponent::OnFootDown()
+{
+	if (!Player || !PlayerMesh) {
+		return;
+	}
+
+	LoadFootPositions();
+	Trace();
+	setFootOnGround();
+
+	for (UFoot* f : FeetOnGround) {
+		FootOnGround = f;
+		if (FootOnGround->hasHitComponentRenderTarget())
+		{
+			drawOnRenderTarget();
+			FootOnGround->IncreaseFootPollution();
+			adjustMovement();
+			emittParticleEffect();
+			playFootPrintSound();
+		}
+
+		else
+		{
+			MovementComponent->resetMovement();
+
+			if (FootOnGround->HasPollution())
+			{
+				FootOnGround->createPollutionFootPrint(GetWorld(), PollutionFootPrintsScale);
+				emittPolutionParticleEffect();
+			}
+		}
+	}
+}
+
+
+
+/** Sets location of every foot based on the bone position	*/
+void UFootPrintComponent::LoadFootPositions()
+{
+	if (!PlayerMesh) {
+		return;
+	}
+
+	for (UFoot* f : TrackedFeet)
+	{
+		f->setLocation(PlayerMesh->GetBoneLocation(f->getBoneName()));
+	}
+}
+
+
+
+
 
 /**  Performs a LineTraceSingleyByChannel for every foot in the UFoot Array*/
 void UFootPrintComponent::Trace()
@@ -188,7 +196,7 @@ void UFootPrintComponent::Trace()
 		//perform LineTrace
 		GetWorld()->LineTraceSingleByChannel(*f->getHitresult(), f->getLocation(), end, ECollisionChannel::ECC_Visibility, TraceParams);
 		//set Rotation
-		f->setRotation(Player->GetActorForwardVector());
+		f->setRotation(GetOwner()->GetActorForwardVector());
 	}
 }
 
@@ -199,6 +207,9 @@ void UFootPrintComponent::setFootOnGround()
 	//FootValues.TrackedFeet.Sort([](UFoot* f1, UFoot* f2) { return f1->getLocation().Z > f2->getLocation().Z; });
 	int32 temp = MAX_int32;
 	int32 key = 0;
+	float maxDifferencePercent = 0.01;
+
+	FeetOnGround.Empty();
 
 	for (int32 i = 0; i < TrackedFeet.Num(); i++)
 	{
@@ -208,37 +219,76 @@ void UFootPrintComponent::setFootOnGround()
 		}
 	}
 
-	FootOnGround = TrackedFeet[key];
-	FootOnGround->updateHitMaterial();
+	UFoot* DeepestFoot = TrackedFeet[key];
+	//FootOnGround->updateHitMaterial();
+
+	for (UFoot* f : TrackedFeet) {
+		float difference = FVector::Distance(DeepestFoot->getLocation(), f->getLocation());
+
+		if (FMath::IsNearlyZero(difference, tolerance)) {
+			FeetOnGround.Add(f);
+			f->updateHitMaterial();
+		}
+	}
+}
+
+
+/**	Calls the drawOnRenderTarget method from the RenderTargetComponent with the specified parameters */
+void UFootPrintComponent::drawOnRenderTarget()
+{
+	if (!RenderTargetComponent) {
+		return;
+	}
+	FRenderTargetValues* RenderTargetValues = FootOnGround->getRenderTargetValues();
+	RenderTargetComponent->drawOnRenderTarget_Implementation(FootOnGround->getFootPrintShape(), *RenderTargetValues, FootPrintShapeTransform);
 }
 
 /** Calls the spawnParticleEmitter method of the ParticleComponent with the specified parameters */
 void UFootPrintComponent::emittParticleEffect()
 {
+	if (!ParticleSystemComponent) {
+		return;
+	}
+
+
 	FVector Location = FootOnGround->getLocation();
 	float height = FootOnGround->getTessellationHeight();
-	ParticleSystem->spawnParticleEmitter(Location, height, FootOnGround->getParticleEffect());
+	ParticleSystemComponent->spawnParticleEmitter(Location, height, FootOnGround->getParticleEffect());
 }
 
 void UFootPrintComponent::emittPolutionParticleEffect()
 {
+	if (!ParticleSystemComponent) {
+		return;
+	}
+
 	FVector Location = FootOnGround->getLocation();
-	ParticleSystem->spawnPollutionParticleEffect(Location, 0, FootOnGround->getPollutionParticleEffect());
+	ParticleSystemComponent->spawnPollutionParticleEffect(Location, 0, FootOnGround->getPollutionParticleEffect());
+	
 }
 
 /** Calls the playFootPrindSound method from the SoundComponent with the specified parameters*/
 void UFootPrintComponent::playFootPrintSound()
 {
+	if (!SoundComponent) {
+		return;
+	}
+
 	FVector Location = FootOnGround->getLocation();
 	USoundBase* Sound = FootOnGround->getFootPrintSound();
-	SoundComputations->playFootPrintSound(Location, Sound);
+	SoundComponent->playFootPrintSound(Location, Sound);
+	
 }
 
 /** Calls the adjustMovement method of the MovementComponent after getting depth from FootOnGround */
 void UFootPrintComponent::adjustMovement()
 {
+	if (!MovementComponent) {
+		return;
+	}
+
 	float depth = FootOnGround->getDepth();
-	MovementComputations->adjustMovement(depth);
+	MovementComponent->adjustMovement(depth);
 }
 
 

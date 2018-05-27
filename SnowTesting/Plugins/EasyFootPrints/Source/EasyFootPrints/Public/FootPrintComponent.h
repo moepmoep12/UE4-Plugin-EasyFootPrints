@@ -22,6 +22,9 @@ class EASYFOOTPRINTS_API UFootPrintComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(BluePrintReadWrite, EditAnyWhere)
+		float tolerance = 0.0f;
+
 	// The array represents all bones that should be tracked by this plugin, insert bone names here
 	UPROPERTY(BluePrintReadWrite, EditAnyWhere, Category = Bones)
 		TArray<FName> BoneNames;
@@ -55,29 +58,36 @@ public:
 	/	custom components can be set via blueprint
 	*/
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = FootPrintComponents)
-		TSubclassOf<class UBaseRenderTargetComponent> RenderTargetComponent = UDefaultRenderTargetComponent::StaticClass();
+		TSubclassOf<class UBaseRenderTargetComponent> RenderTargetComponentClass = UDefaultRenderTargetComponent::StaticClass();
 
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = FootPrintComponents)
-		TSubclassOf<class UBaseMovementAdjustmentComponent> AdjMovementComponent = UDefaultMovementAdjustmentComp::StaticClass();
+		TSubclassOf<class UBaseMovementAdjustmentComponent> AdjMovementComponentClass = UDefaultMovementAdjustmentComp::StaticClass();
 
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = FootPrintComponents)
-		TSubclassOf<class UBaseParticleSystemComponent> ParticleSystemComponent = UDefaultParticleSystemComponent::StaticClass();
+		TSubclassOf<class UBaseParticleSystemComponent> ParticleSystemComponentClass = UDefaultParticleSystemComponent::StaticClass();
 
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = FootPrintComponents)
-		TSubclassOf<class UBasePollutionComponent> PollutionComponent = UDefaultPollutionComponent::StaticClass();
+		TSubclassOf<class UBasePollutionComponent> PollutionComponentClass = UDefaultPollutionComponent::StaticClass();
 
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = FootPrintComponents)
-		TSubclassOf<class UBaseSoundComponent> SoundComponent = UDefaultSoundComponent::StaticClass();
+		TSubclassOf<class UBaseSoundComponent> SoundComponentClass = UDefaultSoundComponent::StaticClass();
 
 
 private:
 	// the owner of this component
 	UPROPERTY()
-		ACharacter* Player;
+		APawn* Player;
+
+	// the skeletal mesh of the owner
+	UPROPERTY()
+		USkeletalMeshComponent* PlayerMesh;
 
 	// this represents the foot that is closest to the ground
 	UPROPERTY()
 		UFoot* FootOnGround;
+
+	UPROPERTY()
+		TArray<UFoot*> FeetOnGround;
 
 	// Array of UFoot that represents all feet that will be tracked
 	UPROPERTY()
@@ -97,13 +107,13 @@ private:
 
 	/** the following components are used for several calculations and will be created from the corresponding component class */
 	UPROPERTY()
-		UBaseSoundComponent* SoundComputations;
+		UBaseSoundComponent* SoundComponent;
 	UPROPERTY()
-		UBaseRenderTargetComponent* RenderTargetComputations;
+		UBaseRenderTargetComponent* RenderTargetComponent;
 	UPROPERTY()
-		UBaseMovementAdjustmentComponent* MovementComputations;
+		UBaseMovementAdjustmentComponent* MovementComponent;
 	UPROPERTY()
-		UBaseParticleSystemComponent* ParticleSystem;
+		UBaseParticleSystemComponent* ParticleSystemComponent;
 
 protected:
 	// Called when the game starts
@@ -133,7 +143,7 @@ public:
 	UFUNCTION()
 		UFoot* getFootOnGround() { return FootOnGround; };
 	UFUNCTION()
-		ACharacter* getPlayer() { return Player; };
+		APawn* getPlayer() { return Player; };
 
 
 };

@@ -21,7 +21,7 @@ class EASYFOOTPRINTS_API UBaseMovementAdjustmentComponent : public UActorCompone
 protected:
 	// pointer to the owners movement component
 	UPROPERTY()
-		UCharacterMovementComponent* MovementComponent;
+		UMovementComponent* MovementComponent;
 
 public:
 	/// <summary>
@@ -43,7 +43,7 @@ public:
 
 
 	// Stores the pointer to the owners MovementComponent for further adjustment
-	inline virtual void initComponent(UCharacterMovementComponent* MovementComponent) 
+	inline virtual void initComponent(UMovementComponent* MovementComponent) 
 	{
 		this->MovementComponent = MovementComponent;
 	};
